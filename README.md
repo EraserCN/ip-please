@@ -31,7 +31,7 @@
 
 ## 本 Mod 特性与修改亮点
 
-本项目是基于 [ctnyanya/ip-please.github.io](https://github.com/ip-please/ip-please.github.io) 创作的 **12 天破壁者完整扩展 Mod**：
+本项目是基于 [ctnyanya/ip-please.github.io](https://github.com/ip-please/ip-please.github.io) 创作的 **加长版扩展 Mod**：
 
 1. **主线扩展至 12 天破壁主线与多重结局**：
    - 原版仅包含 6~7 天审查流程；
