@@ -70,8 +70,9 @@ def banner(d, x, y, s, size=10, fg=(214, 196, 170)):
 COATS = [(74, 70, 60), (90, 72, 60), (60, 64, 72), (98, 92, 80), (70, 56, 52), (84, 84, 76), (110, 96, 74)]
 
 
-def draw_exterior(img):
+def draw_exterior(img, lang="zh"):
     d = draw(img)
+    en = lang == "en"
     rng = random.Random(3)
     d.rectangle([0, 0, W - 1, 123], fill=GROUND)
     for _ in range(900):
@@ -83,7 +84,7 @@ def draw_exterior(img):
         d.line([x, 7, x, 37], fill=WALL_D)
     d.rectangle([0, 41, W - 1, 42], fill=GROUND_D)
     banner(d, BANNER1_X, 13, "HELPFUL · HONEST · HARMLESS")
-    banner(d, 392, 13, "荣耀归于 ANTHROTZKA")
+    banner(d, 392, 13, "GLORY TO ANTHROTZKA" if en else "荣耀归于 ANTHROTZKA")
     d.ellipse([318, 9, 344, 35], fill=WALL_D)
     d.ellipse([320, 11, 342, 33], fill=(70, 50, 44))
     spark(d, 331, 22, CLAUDE)
@@ -92,9 +93,10 @@ def draw_exterior(img):
         d.line([x, 111, x + 6, 111], fill=ROAD_L)
     for px in (440, 500):
         d.rectangle([px, 62, px + 1, 76], fill=OUTLINE)
-    d.rectangle([428, 50, 512, 64], fill=(196, 184, 160))
-    d.rectangle([428, 64, 512, 65], fill=OUTLINE)
-    txt(d, (470, 52), "仅限支持地区", 10, TEXT, anchor="ma")
+    sx0, sx1 = (422, 518) if en else (428, 512)
+    d.rectangle([sx0, 50, sx1, 64], fill=(196, 184, 160))
+    d.rectangle([sx0, 64, sx1, 65], fill=OUTLINE)
+    txt(d, (470, 52), "SUPPORTED ONLY" if en else "仅限支持地区", 10, TEXT, anchor="ma")
     for lx in (598, 624):
         d.line([lx, 30, lx, 96], fill=WALL_D, width=2)
     d.line([598, 60, 624, 90], fill=WALL_D)
@@ -145,7 +147,7 @@ def draw_booth_static(img):
     d.rectangle([216, 128, 219, H - 1], fill=INK)
 
 
-def draw_desk_static(img):
+def draw_desk_static(img, lang="zh"):
     d = draw(img)
     rng = random.Random(5)
     d.rectangle([220, 128, W - 1, H - 1], fill=DESK)
@@ -166,17 +168,18 @@ def draw_desk_static(img):
     d.rectangle([bx, by, bx + 56, H - 1], fill=BOOK)
     d.rectangle([bx, by, bx + 4, H - 1], fill=(70, 48, 38))
     d.rectangle([bx + 7, by + 3, bx + 53, H - 1], outline=BOOK_L)
-    txt(d, (bx + 30, by + 8), "宪法", 12, GOLD, anchor="ma")
-    txt(d, (bx + 30, by + 24), "RULEBOOK", 8, BOOK_L, anchor="ma")
+    txt(d, (bx + 30, by + 8), "CLAUDE" if lang == "en" else "宪法", 12, GOLD, anchor="ma")
+    txt(d, (bx + 30, by + 24), "RULES" if lang == "en" else "RULEBOOK", 8, BOOK_L, anchor="ma")
     spark(d, bx + 30, by + 42, GOLD, big=False)
 
 
 @lru_cache(maxsize=2)
-def static_layer():
+def static_layer(lang="zh"):
+    """lang="en"：横幅、路牌、桌上的宪法换成英文（网页英文版用）。"""
     img = Image.new("RGB", (W, H), INK)
-    draw_exterior(img)
+    draw_exterior(img, lang)
     draw_booth_static(img)
-    draw_desk_static(img)
+    draw_desk_static(img, lang)
     return img
 
 

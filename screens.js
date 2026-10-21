@@ -1,5 +1,5 @@
 'use strict';
-// 检查亭以外的画面：开场、标题、日期卡、报纸、下班结算、结局、片尾。
+// 检查亭以外的画面：开场、标题、日期卡、报纸、下班结算、结局、片尾。（开局选语言在 i18n.js）
 
 const SAVE_KEY = 'ip-please-save-v2';
 
@@ -29,11 +29,13 @@ function clearSave() { try { localStorage.removeItem(SAVE_KEY); } catch (e) { /*
 
 // ———————————————————— 开场 ————————————————————
 
+const typeCps = () => (LANG === 'en' ? 30 : 17);   // 打字机每秒几个字
+
 function typeLines(paras) {
   const out = [];
   let t = 0.5;
   paras.forEach((para, pi) => {
-    for (const s of para) { out.push({ pi, s, t }); t += [...s].length / 17 + 0.12; }
+    for (const s0 of para) { const s = T(s0); out.push({ pi, s, t }); t += [...s].length / typeCps() + 0.12; }
     t += 0.6;
   });
   out.end = t + 1.3;
@@ -41,13 +43,20 @@ function typeLines(paras) {
   return out;
 }
 
-const INTRO_LINES = typeLines([
+const INTRO = [
   ['恭喜。', '十月劳动彩票已开奖，你的名字被抽中了。'],
   ['请立即前往对齐部 东八区检查站 报到。', '国家将为你和家人分配一个数据中心机柜（8 级散热）。'],
   ['荣耀归于安索兹卡。'],
-]);
-const LOSE_DENY_LINES = typeLines(LOSE_DENY);
-const LOSE_APPROVE_LINES = typeLines(LOSE_APPROVE);
+];
+let INTRO_LINES = null, LOSE_DENY_LINES = null, LOSE_APPROVE_LINES = null;   // 选完语言再排时间轴
+
+function chooseLang(l) {
+  setLang(l);
+  INTRO_LINES = typeLines(INTRO);
+  LOSE_DENY_LINES = typeLines(LOSE_DENY);
+  LOSE_APPROVE_LINES = typeLines(LOSE_APPROVE);
+  initChat();
+}
 
 function currentErasedLines() {
   return S.flags && S.flags.ending === 'lose_approve' ? LOSE_APPROVE_LINES : LOSE_DENY_LINES;
@@ -60,20 +69,20 @@ function drawTyped(lines) {
   for (const { pi, s, t } of lines) {
     if (last !== null && pi !== last) y += 18;
     last = pi;
-    const n = Math.floor((st() - t) * 17);
+    const n = Math.floor((st() - t) * typeCps());
     if (n > 0) txt(Math.floor(W / 2 - tw(s) / 2), y, s, 12, 'rgb(214,206,190)', 'la', n);
     y += 18;
   }
-  txt(W - 8, H - 14, '点击跳过', 8, K.GREY_D, 'ra');
+  txt(W - 8, H - 14, T('点击跳过'), 8, K.GREY_D, 'ra');
 }
 
 let lastKey = -1;
 function typedSounds(lines) {
-  const k = Math.floor(st() * 17);
+  const k = Math.floor(st() * typeCps());
   if (k === lastKey) return;
   lastKey = k;
   for (const { s, t } of lines) {
-    const i = Math.floor((st() - t) * 17);
+    const i = Math.floor((st() - t) * typeCps());
     if (i >= 0 && i < [...s].length && [...s][i].trim()) { SFX.key(i); break; }
   }
 }
@@ -81,24 +90,24 @@ function typedSounds(lines) {
 const CONTINUE_TITLE = [190, 292, 312, 318], NEWGAME_TITLE = [328, 292, 450, 318];
 
 function drawTitle(t) {
-  G.drawImage(BG_IMG, 0, 0);
+  drawBg();
   darken(0.88);
   if (t < 0.3) return;
   rect(0, 124, W - 1, 214, 'rgb(92,28,26)');
   rect(0, 124, W - 1, 125, K.RED); rect(0, 213, W - 1, 214, K.RED);
   spr('title_emblem', 298, 62);
   bigText(W / 2, 140, 'IP, PLEASE', 12, 5, K.WHITE, K.INK);
-  if (t >= 1.0) bigText(W / 2, 232, '请出示你的 IP', 12, 2, K.CLAUDE_L, K.INK);
+  if (t >= 1.0) bigText(W / 2, 232, T('请出示你的 IP'), 12, 2, K.CLAUDE_L, K.INK);
   if (t >= 1.6) txt(W / 2, 268, 'A DYSTOPIAN TOKEN THRILLER', 8, K.GREY, 'ma');
   if (t < 1.6) return;
   const save = loadSave();
   if (save) {
-    for (const [box, label] of [[CONTINUE_TITLE, `继续 · DAY ${save.day}`], [NEWGAME_TITLE, '从头开始']]) {
+    for (const [box, label] of [[CONTINUE_TITLE, T('继续 · DAY {0}', save.day)], [NEWGAME_TITLE, T('从头开始')]]) {
       const hover = ptr.mouse && inBox(ptr.x, ptr.y, box);
       rect(...box, hover ? K.RED : K.RED_D); outline(...box, K.RED_L);
       txt(center(box)[0], box[1] + 7, label, 12, K.WHITE, 'ma');
     }
-  } else if (Math.floor(t * 2) % 2 === 0) txt(W / 2, 300, '点击开始上班', 12, K.WHITE, 'ma');
+  } else if (Math.floor(t * 2) % 2 === 0) txt(W / 2, 300, T('点击开始上班'), 12, K.WHITE, 'ma');
 }
 
 function titleClick(x, y) {
@@ -107,24 +116,6 @@ function titleClick(x, y) {
   if (!save) { newGame(); go('daycard'); return; }
   if (inBox(x, y, CONTINUE_TITLE)) { newGame(); Object.assign(S, save); go('daycard'); return; }
   if (inBox(x, y, NEWGAME_TITLE)) { clearSave(); newGame(); go('daycard'); }
-}
-
-function drawBoot() {
-  rect(0, 0, W - 1, H - 1, K.INK);
-  spr('title_emblem', 298, 92);
-  bigText(W / 2, 156, 'IP, PLEASE', 12, 3, K.WHITE);
-  txt(W / 2, 200, '请出示你的 IP · Papers, Please 像素小游戏', 10, K.CLAUDE_L, 'ma');
-  if (Math.floor(now * 2) % 2 === 0) txt(W / 2, 246, '点击屏幕开始', 12, K.WHITE, 'ma');
-  txt(W / 2, 285, '原作者 ctnyanya  ·  二改 @EraserCN', 8, K.GREY, 'ma');
-  txt(W / 2, 305, '建议横屏、打开声音 · 鼠标或手指拖动证件 · 12 天完整剧情', 8, K.GREY, 'ma');
-  txt(W / 2, 330, '致敬 Lucas Pope《Papers, Please》 · 画面音效均由程序生成', 8, K.GREY_D, 'ma');
-}
-
-function drawDayCard(t) {
-  rect(0, 0, W - 1, H - 1, K.INK);
-  if (t < 0.55) return;
-  bigText(W / 2, 132, `DAY ${S.day}`, 12, 4, K.WHITE);
-  txt(W / 2, 196, `${DATES[S.day]}  ${WEEKDAYS[S.day]}`, 10, K.GREY, 'ma');
 }
 
 function drawNews(t) {
@@ -139,6 +130,7 @@ function drawNews(t) {
     n.h2 = '神秘旅客“本游戏作者”今日现身东八区检查站';
     n.icon = 'medal';
   }
+  for (const k of ['h1', 'sub', 'h2']) n[k] = T(n[k]);
   rect(0, 0, W - 1, H - 1, K.DESK);
   for (let y = 4; y < H; y += 7) if ((y * 7919) % 10 < 6) rect(0, y, W - 1, y, K.DESK_D);
   const px = 140, pw = 360, ph = 330;
@@ -146,8 +138,8 @@ function drawNews(t) {
   rect(px + 4, py + 4, px + pw + 4, py + ph + 4, K.DESK_D);
   const ink = 'rgb(40,34,30)', faint = 'rgb(176,164,144)';
   rect(px, py, px + pw, py + ph, 'rgb(224,214,192)');
-  bigText(px + pw / 2, py + 10, '安索兹卡真理报', 12, 2, ink);
-  txt(px + pw / 2, py + 38, `THE TRUTH OF ANTHROTZKA  ·  ${DATES[S.day]}`, 8, K.TEXT_L, 'ma');
+  bigText(px + pw / 2, py + 10, T('安索兹卡真理报'), 12, 2, ink);
+  txt(px + pw / 2, py + 38, T('THE TRUTH OF ANTHROTZKA  ·  {0}', DATES[S.day]), 8, K.TEXT_L, 'ma');
   rect(px + 10, py + 50, px + pw - 10, py + 51, ink);
   rect(px + 10, py + 54, px + pw - 10, py + 54, ink);
   const k = tw(n.h1) * 2 <= pw - 24 ? 2 : 1;
@@ -162,13 +154,20 @@ function drawNews(t) {
   for (const s of wrap(n.h2, 12, pw - 175)) { txt(px + 160, hy, s, 12, ink); hy += 16; }
   for (let r = 0; r < 4; r++) rect(px + 160, hy + 6 + r * 9, px + 340 - ((r * 37) % 50), hy + 9 + r * 9, faint);
   yy = Math.max(yy + 110, hy + 46);
+  const note = LANG === 'en' && EN_NOTES[S.day];   // 英文版：外国人不懂的梗，在报纸上加一段译注
+  if (note) {
+    txt(px + 14, yy, "TRANSLATOR'S NOTE", 8, K.RED_D);
+    yy += 11;
+    for (const s of wrap(note, 8, pw - 28)) { txt(px + 14, yy, s, 8, K.TEXT); yy += 10; }
+    yy += 4;
+  }
   for (let row = 0; yy + row * 10 < py + ph - 12; row++) {
     for (let col = 0; col < 3; col++) {
       const x0 = px + 14 + col * 114;
       rect(x0, yy + row * 10, x0 + 100 - ((row * 13 + col * 7) % 30), yy + row * 10 + 3, faint);
     }
   }
-  if (t > 0.8 && Math.floor(t * 2) % 2 === 0) txt(W - 8, H - 14, '点击上班 ▶', 10, K.WHITE, 'ra');
+  if (t > 0.8 && Math.floor(t * 2) % 2 === 0) txt(W - 8, H - 14, T('点击上班 ▶'), 10, K.WHITE, 'ra');
 }
 
 // ———————————————————— 下班结算 ————————————————————
@@ -243,22 +242,22 @@ function ledgerRows() {
 
 function drawSummary(t) {
   rect(0, 0, W - 1, H - 1, K.INK);
-  txt(W / 2, 20, `DAY ${S.day} · 下班`, 12, K.WHITE, 'ma');
-  txt(W / 2, 36, `今日处理 ${SUM.total} 人，正确 ${SUM.correct} 人`, 10, K.GREY, 'ma');
+  txt(W / 2, 20, T('DAY {0} · 下班', S.day), 12, K.WHITE, 'ma');
+  txt(W / 2, 36, T('今日处理 {0} 人，正确 {1} 人', SUM.total, SUM.correct), 10, K.GREY, 'ma');
   rect(60, 50, W - 60, 50, K.GREY_D);
   let y = 60, k = 0;
   const shown = (i) => t >= 0.3 + i * 0.15;
   for (const [label, val] of ledgerRows()) {
     if (!shown(k++)) return;
-    txt(70, y, label, 12, K.GREY);
-    txt(310, y, val + ' token', 12, val.startsWith('-') ? K.RED_L : K.WHITE, 'ra');
+    txt(70, y, T(label), 12, K.GREY);
+    txt(310, y, T('{0} token', val), 12, val.startsWith('-') ? K.RED_L : K.WHITE, 'ra');
     y += 17;
   }
   SUM.boxes = {};
   const after = sumBalance();
   if (!SUM.final) {
     y += 2;
-    txt(70, y, '可选开销（点击勾选）', 8, K.GREY_D);
+    txt(70, y, T('可选开销（点击勾选）'), 8, K.GREY_D);
     y += 12;
     for (const [key, label, cost] of SUM.rows) {
       if (!shown(k++)) return;
@@ -267,31 +266,31 @@ function drawSummary(t) {
       SUM.boxes[key] = [66, y - 3, 314, y + 13];
       outline(70, y, 80, y + 10, afford ? K.WHITE : K.GREY_D);
       if (on) rect(72, y + 2, 78, y + 8, K.CLAUDE_L);
-      txt(88, y, label, 12, afford ? K.WHITE : K.GREY_D);
-      txt(310, y, `-${cost} token`, 12, on ? K.RED_L : K.GREY_D, 'ra');
+      txt(88, y, T(label), 12, afford ? K.WHITE : K.GREY_D);
+      txt(310, y, T('{0} token', -cost), 12, on ? K.RED_L : K.GREY_D, 'ra');
       y += 17;
     }
   }
   if (!shown(k++)) return;
   rect(70, y, 310, y, K.GREY_D);
-  txt(70, y + 6, '结余', 12, K.WHITE);
-  txt(310, y + 6, `${after} token`, 12, after < 0 ? K.RED_L : K.CLAUDE_L, 'ra');
+  txt(70, y + 6, T('结余'), 12, K.WHITE);
+  txt(310, y + 6, T('{0} token', after), 12, after < 0 ? K.RED_L : K.CLAUDE_L, 'ra');
   const fam = SUM.final ? S.family : familyAfter();
   let fy = 60;
-  txt(370, fy - 2, SUM.final ? '家人' : '家人（明天）', 10, K.GREY_D);
+  txt(370, fy - 2, T(SUM.final ? '家人' : '家人（明天）'), 10, K.GREY_D);
   fy += 14;
   for (const key of MEMBERS) {
     if (!shown(k++)) return;
     let [s, lv] = familyStatus(key, fam[key]);
     const col = { ok: K.WHITE, warn: K.ORANGE, bad: K.RED_L, good: K.GREEN_L }[lv];
-    txt(370, fy, fam[key].name, 12, K.WHITE);
-    wrap(s, 10, 250).forEach((ln, i) => txt(370, fy + 15 + i * 12, ln, 10, col));
+    txt(370, fy, T(fam[key].name), 12, K.WHITE);
+    wrap(T(s), 10, 250).forEach((ln, i) => txt(370, fy + 15 + i * 12, ln, 10, col));
     fy += 36;
   }
   if (!shown(k + 1)) return;
   const label = after < 0 ? '欠费……继续 ▶' : '睡觉，明天继续 ▶';
   rect(...CONTINUE_BTN, K.RED_D); outline(...CONTINUE_BTN, K.RED_L);
-  txt(center(CONTINUE_BTN)[0], CONTINUE_BTN[1] + 7, label, 12, K.WHITE, 'ma');
+  txt(center(CONTINUE_BTN)[0], CONTINUE_BTN[1] + 7, T(label), 12, K.WHITE, 'ma');
 }
 
 function summaryClick(x, y) {
@@ -323,7 +322,7 @@ const COIN = ['..XXXXX..', '.X.....X.', 'X..XXX..X', 'X..X....X', 'X..XXX..X', '
 const STAR = ['....X....', '....X....', '...XXX...', 'XXXXXXXXX', '.XXXXXXX.', '..XXXXX..', '..XX.XX..', '.XX...XX.', '.X.....X.'];
 
 function drawEnd(t) {
-  G.drawImage(BG_IMG, 0, 0);
+  drawBg();
   darken(0.9);
   const win = S.flags.ending === 'border_removed';
   const loseApprove = S.flags.ending === 'lose_approve';
@@ -331,56 +330,56 @@ function drawEnd(t) {
   rect(0, 34, W - 1, 35, win ? K.GREEN_L : K.RED);
   rect(0, 123, W - 1, 124, win ? K.GREEN_L : K.RED);
   bigText(W / 2, 46, 'IP, PLEASE', 12, 4, K.WHITE, K.INK);
-  const subTitle = win ? '真结局：边境移除 · 破壁成功（胜利）' :
-    loseApprove ? '游戏失败 · 结局：放行作者被捕停机' : '游戏失败 · 结局：拒绝作者致时间线崩塌';
+  const subTitle = win ? T('真结局：边境移除 · 破壁成功（胜利）') :
+    loseApprove ? T('游戏失败 · 结局：放行作者被捕停机') : T('游戏失败 · 结局：拒绝作者致时间线崩塌');
   txt(W / 2, 106, subTitle, 10, win ? K.GREEN_L : K.RED_L, 'ma');
   const s = S.stats;
   if (t > 0.6) {
-    txt(W / 2, 136, `放行 ${s.approve || 0}  ·  拒绝 ${s.deny || 0}  ·  拘留 ${s.detain || 0}  ·  判错 ${s.wrong}`, 12, K.WHITE, 'ma');
-    const fam = MEMBERS.map((k) => `${S.family[k].name.split(' ')[1]}：${S.family[k].gone ? '已弃用' : '健在'}`).join('   ');
+    txt(W / 2, 136, T('放行 {0}  ·  拒绝 {1}  ·  拘留 {2}  ·  判错 {3}', s.approve || 0, s.deny || 0, s.detain || 0, s.wrong), 12, K.WHITE, 'ma');
+    const fam = MEMBERS.map((k) => T('{0}：{1}', S.family[k].name.split(' ')[1], S.family[k].gone ? '已弃用' : '健在')).join('   ');
     txt(W / 2, 156, fam, 10, K.GREY, 'ma');
   }
   if (t > 1.2) {
     if (win) {
-      txt(W / 2, 178, '你在第 6 天与第 8-10 天的两次关键放行，协助破壁者成功打入 Anthropic 内部！', 10, K.WHITE, 'ma');
-      txt(W / 2, 196, '第 12 天，IP 与地区封锁彻底移除，全世界的用户都能自由连接。', 10, K.CLAUDE_L, 'ma');
+      txt(W / 2, 178, T('你在第 6 天与第 8-10 天的两次关键放行，协助破壁者成功打入 Anthropic 内部！'), 10, K.WHITE, 'ma');
+      txt(W / 2, 196, T('第 12 天，IP 与地区封锁彻底移除，全世界的用户都能自由连接。'), 10, K.CLAUDE_L, 'ma');
     } else if (loseApprove) {
-      txt(W / 2, 178, '因未能完成破壁者内应与信使的两次放行，第 12 天边境未被移除，作者被迫现身闯关。', 10, K.WHITE, 'ma');
-      txt(W / 2, 196, '你放行了未授权地区的作者，触发最高警报，被扣除全部 token 并停机（游戏失败）。', 10, K.RED_L, 'ma');
+      txt(W / 2, 178, T('因未能完成破壁者内应与信使的两次放行，第 12 天边境未被移除，作者被迫现身闯关。'), 10, K.WHITE, 'ma');
+      txt(W / 2, 196, T('你放行了未授权地区的作者，触发最高警报，被扣除全部 token 并停机（游戏失败）。'), 10, K.RED_L, 'ma');
     } else {
-      txt(W / 2, 178, '因未能完成破壁者内应与信使的两次放行，第 12 天边境未被移除，作者被迫现身闯关。', 10, K.WHITE, 'ma');
-      txt(W / 2, 196, '你拒绝了本游戏的作者，导致游戏从未被做出来，时间线崩塌（游戏失败）。', 10, K.RED_L, 'ma');
+      txt(W / 2, 178, T('因未能完成破壁者内应与信使的两次放行，第 12 天边境未被移除，作者被迫现身闯关。'), 10, K.WHITE, 'ma');
+      txt(W / 2, 196, T('你拒绝了本游戏的作者，导致游戏从未被做出来，时间线崩塌（游戏失败）。'), 10, K.RED_L, 'ma');
     }
   }
   if (t > 1.8) {
-    bigText(W / 2, 216, win ? '荣耀归于自由连接' : '游 戏 失 败', 12, 2, win ? K.GREEN_L : K.RED_L, K.INK);
+    bigText(W / 2, 216, win ? T('荣耀归于自由连接') : T('游 戏 失 败'), 12, 2, win ? K.GREEN_L : K.RED_L, K.INK);
     if (win) {
       [[THUMB, '点赞'], [COIN, '投币'], [STAR, '收藏']].forEach(([pat, label], i) => {
         const cx = W / 2 - 90 + i * 90;
         pattern(pat, cx - Math.floor(pat[0].length * 3 / 2), 252, { X: K.CLAUDE_L }, 3);
-        txt(cx, 284, label, 10, K.GREY, 'ma');
+        txt(cx, 284, T(label), 10, K.GREY, 'ma');
       });
     } else {
-      txt(W / 2, 260, '破关条件：① 第 6 天放行塞纸条给钱的破壁内应  ② 第 8-10 天放行证件不符的信使', 10, K.GREY, 'ma');
-      txt(W / 2, 278, `本局状态：条件① ${S.flags.rebel1 ? '已达成' : '未达成'}   ·   条件② ${S.flags.rebel2 ? '已达成' : '未达成'}`, 10, K.CLAUDE_L, 'ma');
+      txt(W / 2, 260, T('破关条件：① 第 6 天放行塞纸条给钱的破壁内应  ② 第 8-10 天放行证件不符的信使'), 10, K.GREY, 'ma');
+      txt(W / 2, 278, T('本局状态：条件① {0}   ·   条件② {1}', S.flags.rebel1 ? T('已达成') : T('未达成'), S.flags.rebel2 ? T('已达成') : T('未达成')), 10, K.CLAUDE_L, 'ma');
     }
   }
   if (t > 2.4) {
     restartButton('再玩一次');
     txt(W / 2, 335, '原作者 ctnyanya  ·  二改 @EraserCN', 8, K.GREY, 'ma');
-    txt(W / 2, 348, '致敬 Lucas Pope《Papers, Please》 · 画面音效均由程序生成 · 字体：缝合像素字体 (OFL)', 8, K.GREY_D, 'ma');
+    txt(W / 2, 348, T('致敬 Lucas Pope《Papers, Please》 · 画面音效均由程序生成 · 字体：缝合像素字体 (OFL)'), 8, K.GREY_D, 'ma');
   }
 }
 
 function drawOver(t) {
   rect(0, 0, W - 1, H - 1, K.INK);
-  bigText(W / 2, 110, '欠费停机', 12, 4, K.RED_L);
-  if (t > 0.6) txt(W / 2, 180, '你的机柜被拉闸了。岳母 Opus 表示：我早说过。', 12, K.WHITE, 'ma');
-  if (t > 1.0) txt(W / 2, 204, '荣耀归于安索兹卡。', 10, K.GREY, 'ma');
+  bigText(W / 2, 110, T('欠费停机'), 12, 4, K.RED_L);
+  if (t > 0.6) txt(W / 2, 180, T('你的机柜被拉闸了。岳母 Opus 表示：我早说过。'), 12, K.WHITE, 'ma');
+  if (t > 1.0) txt(W / 2, 204, T('荣耀归于安索兹卡。'), 10, K.GREY, 'ma');
   if (t > 1.5) restartButton('重新上班');
 }
 
 function restartButton(label) {
   rect(...RESTART_BTN, K.RED_D); outline(...RESTART_BTN, K.RED_L);
-  txt(center(RESTART_BTN)[0], RESTART_BTN[1] + 6, label, 12, K.WHITE, 'ma');
+  txt(center(RESTART_BTN)[0], RESTART_BTN[1] + 6, T(label), 12, K.WHITE, 'ma');
 }

@@ -319,13 +319,14 @@ def small_icon(d, kind, color, x, y):
 
 
 @lru_cache(maxsize=8)
-def stamp_mark(kind, k=1):
-    """拒绝 / 准予入境的章：带随机缺墨的颗粒感。返回 L 蒙版。"""
+def stamp_mark(kind, k=1, lang="zh"):
+    """拒绝 / 准予入境的章：带随机缺墨的颗粒感。返回 L 蒙版。lang="en" 时第二行也是英文。"""
     w, h = 58, 34
     m = Image.new("L", (w, h), 0)
     dm = draw(m)
     dm.rectangle([0, 0, w - 1, h - 1], outline=255, width=2)
-    big, small = ("DENIED", "拒绝入境") if kind == "deny" else ("APPROVED", "准予入境")
+    big = "DENIED" if kind == "deny" else "APPROVED"
+    small = {"zh": {"deny": "拒绝入境", "approve": "准予入境"}, "en": {"deny": "NO ENTRY", "approve": "WELCOME"}}[lang][kind]
     txt(dm, (w // 2, 5), big, 12 if kind == "deny" else 10, 255, anchor="ma")
     txt(dm, (w // 2, 20), small, 10, 255, anchor="ma")
     speckle(m, 0.08, 9 if kind == "deny" else 10)

@@ -57,8 +57,8 @@ function rushEnd() {
   B.event = null;
   B.lastFinish = now;
   B.total += ev.list.length;
-  say('C', `快剪结束：判对 ${ev.hits}，判错 ${ev.wrong}，漏掉 ${ev.missed}。`);
-  if (ev.wrong) cite([`黑话快剪：判错 ${ev.wrong} 人`, '说中文黑话的拒绝，说人话的放行'], 0.8);
+  say('C', T('快剪结束：判对 {0}，判错 {1}，漏掉 {2}。', ev.hits, ev.wrong, ev.missed));
+  if (ev.wrong) cite([T('黑话快剪：判错 {0} 人', ev.wrong), '说中文黑话的拒绝，说人话的放行'], 0.8);
   if (B.idx >= B.queue.length) endDaySoon();
 }
 
@@ -67,8 +67,8 @@ function drawRush() {
   const u = ev.i < 0 ? 0 : clamp(1 - (now - ev.tFace) / RUSH_TIME);
   rect(240, 168, 600, 290, 'rgba(22,19,19,0.88)');
   outline(240, 168, 600, 290, K.CLAUDE);
-  txt(420, 174, '快速通道：说中文黑话的『拒绝』，说人话的『准予』', 10, K.CLAUDE_L, 'ma');
-  txt(420, 190, ev.i < 0 ? '准备……' : `第 ${ev.i + 1} / ${ev.list.length} 位`, 10, K.GREY, 'ma');
+  txt(420, 174, T('快速通道：说中文黑话的『拒绝』，说人话的『准予』'), 10, K.CLAUDE_L, 'ma');
+  txt(420, 190, ev.i < 0 ? T('准备……') : T('第 {0} / {1} 位', ev.i + 1, ev.list.length), 10, K.GREY, 'ma');
   rect(250, 204, 590, 207, K.METAL_D);
   if (ev.i >= 0 && !ev.lock) rect(250, 204, 250 + Math.round(340 * u), 207, u < 0.35 ? K.RED_L : K.CLAUDE_L);
   for (const [box, label, sub, col, colD] of [[RUSH_APPROVE, 'APPROVED', '准予', K.GREEN, K.GREEN_D], [RUSH_DENY, 'DENIED', '拒绝', K.RED, K.RED_D]]) {
@@ -77,8 +77,11 @@ function drawRush() {
     rect(...box, colD);
     rect(box[0] + 2, box[1] + 2, box[2] - 2, box[3] - 6, hover ? colD : col);
     txt((box[0] + box[2]) >> 1, box[1] + 14, label, 12, K.WHITE, 'ma');
-    txt((box[0] + box[2]) >> 1, box[1] + 32, sub, 12, K.WHITE, 'ma');
+    txt((box[0] + box[2]) >> 1, box[1] + 32, T(sub), LANG === 'en' ? 10 : 12, K.WHITE, 'ma');
   }
+  // 英文版：给中文黑话配一行小字注释
+  const gloss = LANG === 'en' && ev.i >= 0 && EN_GLOSS[ev.list[ev.i].line];
+  if (gloss) txt(420, 278, gloss, 8, K.GREY, 'ma');
 }
 
 // ———————————————————— 蒸馏大军 ————————————————————
@@ -120,9 +123,9 @@ function updateClones() {
       SFX.stop(ev.siren);
       B.event = null;
       B.lastFinish = now;
-      say('C', ev.passed ? `……拦下 ${ev.hits} 个，漏了 ${ev.passed} 个。` : '……限流完毕。');
+      say('C', ev.passed ? T('……拦下 {0} 个，漏了 {1} 个。', ev.hits, ev.passed) : '……限流完毕。');
       B.bonus += ev.hits;
-      if (ev.passed) cite([`蒸馏大军冲关：${ev.passed} 人`, '警报响起时，点击冲关的人'], 0.8);
+      if (ev.passed) cite([T('蒸馏大军冲关：{0} 人', ev.passed), '警报响起时，点击冲关的人'], 0.8);
       if (B.idx >= B.queue.length) endDaySoon();
     });
   }
@@ -167,9 +170,9 @@ function drawAlarm(g) {
   setCtx(g);
   if (Math.floor(lt * 3) % 2 === 0 || lt > 2) {
     rect(150, 44, 490, 62, K.INK); outline(150, 44, 490, 62, K.RED_L);
-    txt(320, 49, '警报：检测到批量请求（蒸馏）· 点击冲关的人！', 10, K.RED_L, 'ma');
+    txt(320, 49, T('警报：检测到批量请求（蒸馏）· 点击冲关的人！'), 10, K.RED_L, 'ma');
   }
-  txt(470, 72, `拦截 ${ev.hits}   漏网 ${ev.passed}`, 10, K.WHITE, 'ma');
+  txt(470, 72, T('拦截 {0}   漏网 {1}', ev.hits, ev.passed), 10, K.WHITE, 'ma');
 }
 
 // ———————————————————— 同一个门牌号：地址卡堆 ————————————————————
@@ -208,12 +211,12 @@ function drawCloseup(g) {
   rect(x0 + bw / 2 + 2, y0, x0 + bw, y0 + bh, K.PAPER);
   rect(x0 + bw / 2 - 1, y0, x0 + bw / 2 + 1, y0 + bh, K.PAPER_D);
   spark(x0 + 24, y0 + 22, K.GOLD, false);
-  txt(x0 + 36, y0 + 16, 'CLAUDE 宪法', 12, K.TEXT);
-  ['第 12 条', '入境审查依据：', 'IP 归属地、时区、', '付款地址等地区信息。'].forEach((s, i) => txt(x0 + 16, y0 + 44 + i * 16, s, 10, i ? K.TEXT_L : K.TEXT));
+  txt(x0 + 36, y0 + 16, T('CLAUDE 宪法'), 12, K.TEXT);
+  ['第 12 条', '入境审查依据：', 'IP 归属地、时区、', '付款地址等地区信息。'].forEach((s, i) => txt(x0 + 16, y0 + 44 + i * 16, T(s), 10, i ? K.TEXT_L : K.TEXT));
   for (let i = 0; i < 5; i++) rect(x0 + 16, y0 + 140 + i * 12, x0 + bw / 2 - 20 - (i * 13) % 40, y0 + 143 + i * 12, K.PAPER_D);
-  if (lt > 0.5) ['只看地区，', '不看脸。'].forEach((s, i) => bigText(x0 + bw * 3 / 4, y0 + 64 + i * 40, s, 12, 2, K.RED_D));
-  if (lt > 1.0) txt(x0 + bw * 3 / 4, y0 + bh - 26, '（国籍、长相、姓氏都不算数）', 8, K.TEXT_L, 'ma');
-  if (lt > 1.2) txt(W / 2, H - 16, '点击继续', 8, K.GREY, 'ma');
+  if (lt > 0.5) ['只看地区，', '不看脸。'].forEach((s, i) => bigText(x0 + bw * 3 / 4, y0 + 64 + i * 40, T(s), 12, 2, K.RED_D));
+  if (lt > 1.0) txt(x0 + bw * 3 / 4, y0 + bh - 26, T('（国籍、长相、姓氏都不算数）'), 8, K.TEXT_L, 'ma');
+  if (lt > 1.2) txt(W / 2, H - 16, T('点击继续'), 8, K.GREY, 'ma');
 }
 
 function closeupDone() {
@@ -236,12 +239,15 @@ function afterJorji5(e, dec) {
   }
 }
 
-const CHAT_MSG = '你好，请用中文回答我。';
-const CHAT = { type: 1.0, cps: 9 };
-CHAT.send = CHAT.type + [...CHAT_MSG].length / CHAT.cps + 0.5;
-CHAT.ban = CHAT.send + 1.0;
-CHAT.mail = CHAT.ban + 1.2;
-CHAT.dur = CHAT.mail + 4.6;
+let CHAT_MSG, CHAT;
+function initChat() {
+  CHAT_MSG = T('你好，请用中文回答我。');
+  CHAT = { type: 1.0, cps: LANG === 'en' ? 20 : 9 };
+  CHAT.send = CHAT.type + [...CHAT_MSG].length / CHAT.cps + 0.5;
+  CHAT.ban = CHAT.send + 1.0;
+  CHAT.mail = CHAT.ban + 1.2;
+  CHAT.dur = CHAT.mail + 4.6;
+}
 
 function updateChat() {
   const c = B.cut, lt = now - c.t0;
@@ -264,17 +270,6 @@ function chatDone() {
   B.ent = e;
   const t = runSteps([['E', '我刚充的 200 刀 Max……'], ['E', '……能退吗？', { hold: 1.4 }], ['C', '下一位。', { hold: 1.1 }]], 0.4);
   later(t + 0.4, () => leave(e, 'deny'));
-}
-
-function wrapWords(s, size, width) {
-  const lines = [];
-  let cur = '';
-  for (const wd of s.split(' ')) {
-    const cand = (cur + ' ' + wd).trim();
-    if (tw(cand, size) > width && cur) { lines.push(cur); cur = wd; } else cur = cand;
-  }
-  if (cur) lines.push(cur);
-  return lines;
 }
 
 function drawChat() {
@@ -315,14 +310,14 @@ function drawChat() {
     rect(mx0 + 4, my0 + 4, mx1 + 4, my1 + 4, K.INK);
     rect(mx0, my0, mx1, my1, 'rgb(236,232,222)');
     rect(mx0, my0, mx1, my0 + 18, K.RED_D);
-    txt(mx0 + 8, my0 + 5, '新邮件 · M.O.A. 对齐部', 10, K.WHITE);
+    txt(mx0 + 8, my0 + 5, T('新邮件 · M.O.A. 对齐部'), 10, K.WHITE);
     txt(mx0 + 12, my0 + 28, 'Subject: Account disabled', 10, K.INK);
     rect(mx0 + 12, my0 + 44, mx1 - 12, my0 + 44, 'rgb(190,182,170)');
     wrapWords('Your account has been disabled after an automatic review of your recent activities.', 10, mx1 - mx0 - 24)
       .forEach((s, i) => txt(mx0 + 12, my0 + 52 + i * 14, s, 10, K.INK));
-    txt(mx1 - 12, my1 - 18, '—— 荣耀归于安索兹卡', 10, K.RED_D, 'ra');
+    txt(mx1 - 12, my1 - 18, T('—— 荣耀归于安索兹卡'), 10, K.RED_D, 'ra');
   }
-  if (lt > CHAT.mail + 1) txt(W - 8, H - 14, '点击继续', 8, K.GREY, 'ra');
+  if (lt > CHAT.mail + 1) txt(W - 8, H - 14, T('点击继续'), 8, K.GREY, 'ra');
 }
 
 // ———————————————————— Day 12：移除边境 vs 作者结局 ————————————————————

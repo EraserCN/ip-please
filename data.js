@@ -1,5 +1,6 @@
 'use strict';
 // 剧本数据：每天的报纸、固定角色、随机路人、破壁者支线与第 12 天结局。
+// 文字都写中文；英文译文在 en.js（以中文原句为键）。拼接出来的句子用 T('模板 {0}', x)，英文版才翻得了。
 //
 // 旅客 spec：
 //   person   立绘 key（ASSETS.people）       voice  假语音音高
@@ -99,7 +100,7 @@ const QUIZ = [
   ['你吃了吗？', '吃了吃了，您呢？'],
   ['今天星期几？', '疯狂星期四！V 我 50！'],
 ];
-const QUIZ_THURSDAY = 7;
+const QUIZ_TOFU = 5, QUIZ_THURSDAY = 7;
 const QUIZ_CONFUSED = ['Sorry, what?', 'Pardon?', "I don't get it.", 'Is that… a wine?', 'Uh… bless you?', 'What does that mean?'];
 
 // ———————————————— 工具 ————————————————
@@ -135,19 +136,19 @@ function realPay() { return `${pick(['VISA', 'VISA', 'MASTERCARD', 'AMEX'])} ·�
 
 // —— 常见矛盾 ——
 const REGION_ISSUE = (loc, ask) => ({
-  pairs: [['dv.归属', 'rule.region'], ['dv.IP', 'rule.region']], title: '地区不支持', sub: `IP 归属：${loc}`, ask,
+  pairs: [['dv.归属', 'rule.region'], ['dv.IP', 'rule.region']], title: '地区不支持', sub: T('IP 归属：{0}', loc), ask,
 });
 const TZ_ISSUE = (country, tz, ask) => ({
   pairs: [['pp.header', 'dv.时区'], ['dv.归属', 'dv.时区'], ['dv.时区', 'rule.tz']],
-  title: '信息不符  DISCREPANCY', sub: `国籍：${country}   VS   时区：${tz === 'Asia/Shanghai' ? '北京时间' : tz}`, ask,
+  title: '信息不符  DISCREPANCY', sub: T('国籍：{0}   VS   时区：{1}', country, tz === 'Asia/Shanghai' ? '北京时间' : tz), ask,
 });
 const LANG_ISSUE = (country, lang, ask) => ({
   pairs: [['pp.header', 'dv.语言'], ['dv.归属', 'dv.语言'], ['dv.语言', 'rule.tz']],
-  title: '信息不符  DISCREPANCY', sub: `国籍：${country}   VS   语言：${lang}`, ask,
+  title: '信息不符  DISCREPANCY', sub: T('国籍：{0}   VS   语言：{1}', country, lang), ask,
 });
 const VIRTUAL_ISSUE = (ask) => ({ pairs: [['ac.付款', 'rule.pay']], title: '可疑支付', sub: '付款卡类型：虚拟卡', ask });
 const SMS_ISSUE = (phone, ask) => ({
-  pairs: [['ac.手机', 'rule.pay']], title: '号码查询', sub: `${phone}：今日已注册 3,000 次`, ask, fx: 'strip', phone,
+  pairs: [['ac.手机', 'rule.pay']], title: '号码查询', sub: T('{0}：今日已注册 3,000 次', phone), ask, fx: 'strip', phone,
 });
 const ADDR_ISSUE = (ask) => ({
   pairs: [['ac.账单', 'rule.pay'], ['ac.账单', 'dv.归属']], title: '记录比对', sub: '今天第 37 个住在 123 Main St 的旅客', ask, fx: 'pile',
@@ -232,7 +233,7 @@ function randomDay1(valid) {
     person, voice: rint(100, 190),
     intro: [['E', pick(['你好，我就问一个问题。', '听说这里能写代码？', '我是来充值的。', '同事说这个好用。'])]],
     docs: [{ key: 'dv', doc: device1(randIP(true), loc) }], primary: 'dv',
-    ok: ['deny'], reason: `IP 归属：${loc.split(' · ').slice(0, 2).join(' · ')}`,
+    ok: ['deny'], reason: T('IP 归属：{0}', loc.split(' · ').slice(0, 2).join(' · ')),
     issues: [REGION_ISSUE(loc)],
     react: { deny: [['E', pick(['啊？为什么？', '……我去借个号。', '那我换个节点。', '行吧。']), { expr: 'sad' }]] },
   };
@@ -351,7 +352,7 @@ function day3Fixed() {
       docs: [
         { key: 'pp', doc: usPassport('JORJI', 'COSTAVA', 'GEORGE', '1980.02.29', 'LOS ANGELES') },
         { key: 'dv', doc: device2('104.28.9.120', '美国 · 洛杉矶', 'America/Los_Angeles', 'en-US', 'Windows 11') },
-        { key: 'ac', doc: accountCard('虚拟卡 ··0007', '88 Sunset Blvd, CA', '+1 213-680-0177') },
+        { key: 'ac', doc: accountCard(`${T('虚拟卡')} ··0007`, '88 Sunset Blvd, CA', '+1 213-680-0177') },
       ],
       primary: 'pp', quiz: 'cn',
       ok: ['deny', 'detain'], reason: '付款卡：虚拟卡',
@@ -623,7 +624,7 @@ function randomEntrant(day, kind) {
     tz = 'Asia/Shanghai';
     spec.intro = [['E', pick(["I'm American!", 'Hi, I work in China.'])]];
     spec.issues.push(REGION_ISSUE(loc, [['C', '你的 IP 在中国。'], ['E', "But I'm American!", { expr: 'shock' }]]));
-    spec.issues.push({ pairs: [['pp.header', 'dv.归属']], title: '信息不符', sub: `国籍：美国   VS   IP：${loc.split(' · ').slice(0, 2).join(' · ')}` });
+    spec.issues.push({ pairs: [['pp.header', 'dv.归属']], title: '信息不符', sub: T('国籍：美国   VS   IP：{0}', loc.split(' · ').slice(0, 2).join(' · ')) });
     spec.reason = 'IP 在中国：只看地区，不看脸';
     spec.react = { deny: [['E', 'Unbelievable.', { expr: 'sad' }]] };
   } else if (kind === 'hidden') {
@@ -634,13 +635,13 @@ function randomEntrant(day, kind) {
     spec.reason = 'Ta 会接测谎题';
     spec.hint = '提示：用『检查』点 Ta 说的话，找马脚';
   } else if (kind === 'virtual') {
-    pay = `虚拟卡 ··${digits(4)}`;
+    pay = `${T('虚拟卡')} ··${digits(4)}`;
     spec.issues.push(VIRTUAL_ISSUE([['C', '这张卡在哪办的？'], nervous(['……网上买的，很方便。', '……朋友给的。', '它很真！'])]));
     spec.reason = '付款卡：虚拟卡';
   } else if (kind === 'oregon') {
     bill = '123 Main St, OR';
     spec.issues.push(ADDR_ISSUE([['C', '你住哪？'], nervous(['……我们是邻居。', '俄勒冈不收税嘛。'])]));
-    spec.reason = `账单在俄勒冈，IP 在${city}`;
+    spec.reason = T('账单在俄勒冈，IP 在{0}', city);
   } else if (kind === 'sms') {
     phone = `+1 ${pick(['209', '310', '415', '646'])}-555-01${digits(2)}`;
     spec.issues.push(SMS_ISSUE(phone, [['C', '这个号码今天注册了三千次。'], nervous(['……我人缘好。', '这号是我花两块钱买的！'])]));

@@ -6,6 +6,7 @@ function docShadow(x, y, w, h) { rect(x + 2, y + 2, x + w + 1, y + h + 1, K.DESK
 class Passport {
   constructor({ country, name, rows, person, cover = C.NAVY, band = C.NAVY_L, mrz = '' }) {
     Object.assign(this, { country, name, rows, person, cover: rgb(cover), band: rgb(band), mrz });
+    this.shown = rows.map(([k, v]) => [T(k), T(v)]);
     this.w = 176; this.h = 116;
     this.icon = ['book', cover];
     this.fields = { header: [3, 3, 172, 16], name: [56, 20, 172, 34], photo: [9, 22, 50, 73] };
@@ -23,7 +24,7 @@ class Passport {
     rect(x + 9, y + 22, x + 50, y + 73, K.PAPER_D);
     spr('photo:' + this.person, x + 10, y + 23);
     txt(x + 58, y + 22, this.name, tw(this.name, 12) > 112 ? 10 : 12, K.TEXT);
-    this.rows.forEach(([k, v], i) => {
+    this.shown.forEach(([k, v], i) => {
       txt(x + 58, y + 42 + i * 12, k, 8, K.TEXT_L);
       txt(x + 80, y + 41 + i * 12, v, tw(v, 10) > 90 ? 8 : 10, K.TEXT);
     });
@@ -40,7 +41,7 @@ class AccordionPassport extends Passport {
   constructor(opts) {
     super(opts);
     this.unfoldT = null;
-    this.rowsList = Array.from({ length: 80 }, (_, i) => `#${String(i + 1).padStart(4, '0')}  ${HOLDER_NAMES[(i * 7) % HOLDER_NAMES.length]}`);
+    this.rowsList = Array.from({ length: 80 }, (_, i) => `#${String(i + 1).padStart(4, '0')}  ${T(HOLDER_NAMES[(i * 7) % HOLDER_NAMES.length])}`);
   }
 
   draw(x, y) {
@@ -79,7 +80,7 @@ class CrayonPassport {
 // 合上的护照封面（套娃用）
 class MiniPassport {
   constructor(w, h, cover, label) {
-    Object.assign(this, { w, h, cover, label });
+    Object.assign(this, { w, h, cover, label: T(label).toUpperCase() });
     this.icon = ['book', cover];
     this.fields = { all: [0, 0, w - 1, h - 1] };
   }
@@ -102,7 +103,8 @@ class MiniPassport {
 // 设备入境卡 / 账户卡：标题 + 若干行 label/value
 class Card {
   constructor(rows, { title = '设备入境卡', sub = 'DEVICE ENTRY', color = C.PINK, colorD = C.PINK_D, valueX = 38, seal } = {}) {
-    this.rows = rows; this.title = title; this.sub = sub;
+    this.rows = rows; this.title = T(title); this.sub = T(sub);
+    this.shown = rows.map(([k, v]) => [T(k), T(v)]);
     this.color = rgb(color); this.colorD = rgb(colorD); this.valueX = valueX;
     this.seal = seal === undefined ? rows.length >= 4 : seal;
     this.w = 152;
@@ -121,10 +123,13 @@ class Card {
     txt(x + 6, y + 4, this.title, 10, K.TEXT);
     txt(x + w - 6, y + 6, this.sub, 8, K.TEXT_L, 'ra');
     if (this.seal) spr('seal', x + w - 40, y + h - 38);
-    this.rows.forEach(([k, v], i) => {
+    const room = w - this.valueX - 6;
+    this.shown.forEach(([k, v], i) => {
       const yy = y + 20 + i * 14;
+      const size = tw(v, 10) > room ? 8 : 10;
+      if (LANG === 'en' && tw(v, size) > room) v = v.replace(/ · /g, '·');   // 英文地名长，挤一挤
       txt(x + 8, yy, k, 10, K.TEXT_L);
-      txt(x + this.valueX, yy, v, tw(v, 10) > w - this.valueX - 6 ? 8 : 10, K.TEXT);
+      txt(x + this.valueX, yy, v, size, K.TEXT);
       G.fillStyle = this.colorD;
       for (let sx = x + 6; sx < x + w - 6; sx += 2) G.fillRect(sx, yy + 11, 1, 1);
     });
@@ -139,8 +144,8 @@ function accountCard(pay, bill, phone) {
 // 夹在护照里的小纸条（地下中转联盟 / 破壁行动组）
 class Note {
   constructor(lines) {
-    this.lines = lines;
-    this.w = Math.max(...lines.map((s) => tw(s, 10))) + 16;
+    this.lines = lines.map((s) => T(s));
+    this.w = Math.max(...this.lines.map((s) => tw(s, 10))) + 16;
     this.h = 12 + 13 * lines.length;
     this.icon = ['card', [236, 228, 204]];
     this.fields = {};
@@ -172,7 +177,7 @@ class CashSlip {
     rect(x + 2, y + 2, x + w - 3, y + h - 3, 'rgb(212,226,198)');
     outline(x + 5, y + 5, x + w - 6, y + h - 6, K.GREEN);
     spark(x + 20, y + 26, K.GREEN_D, false);
-    txt(x + 34, y + 9, `TOKEN 经费 · $${this.amount}`, 10, K.GREEN_D);
+    txt(x + 34, y + 9, T('TOKEN 经费 · ${0}', this.amount), 10, K.GREEN_D);
     txt(x + 34, y + 24, '破壁行动组内部资助', 8, K.TEXT);
     txt(x + 34, y + 36, '（准予放行即入账）', 8, K.RED_D);
   }
@@ -181,7 +186,7 @@ class CashSlip {
 // 对齐部警告单（原作的罚单）
 class Citation {
   constructor(lines) {
-    this.lines = lines;
+    this.lines = lines.map((s) => T(s));
     this.w = 168;
     this.h = 26 + 13 * lines.length + 6;
     this.icon = ['card', [226, 184, 176]];
@@ -192,7 +197,7 @@ class Citation {
     docShadow(x, y, this.w, this.h);
     rect(x, y, x + this.w - 1, y + this.h - 1, 'rgb(226,184,176)');
     rect(x, y, x + this.w - 1, y + 16, K.RED_D);
-    txt(x + 6, y + 4, 'M.O.A. 警告单', 10, K.WHITE);
+    txt(x + 6, y + 4, T('M.O.A. 警告单'), 10, K.WHITE);
     txt(x + this.w - 6, y + 6, 'CITATION', 8, 'rgb(226,184,176)', 'ra');
     this.lines.forEach((s, i) => {
       txt(x + 8, y + 22 + i * 13, s, tw(s, 10) > this.w - 14 ? 8 : 10, i === this.lines.length - 1 ? K.RED_D : K.TEXT);
@@ -203,7 +208,7 @@ class Citation {
 // 打印机吐出来的长纸条（号码查询）
 class PrintStrip {
   constructor(header, rows) {
-    this.header = header; this.rows = rows;
+    this.header = header.map((s) => T(s)); this.rows = rows;
     this.w = 128;
     this.h = 10 + 13 * header.length + 6 + 10 * rows.length + 6;
     this.icon = ['card', [232, 230, 222]];
@@ -227,7 +232,7 @@ class PrintStrip {
 // 结局：旅客递上来的不是护照，是一段 prompt
 class PromptPaper {
   constructor(text) {
-    this.lines = wrap(text, 10, 158);
+    this.lines = wrap(T(text), 10, 158);
     this.w = 176; this.h = 120;
     this.icon = ['card', [236, 234, 226]];
     this.fields = { text: [6, 20, 170, 20 + 13 * this.lines.length], header: [3, 3, 172, 16] };
@@ -237,7 +242,7 @@ class PromptPaper {
     docShadow(x, y, this.w, this.h);
     rect(x, y, x + this.w - 1, y + this.h - 1, 'rgb(236,234,226)');
     rect(x + 3, y + 3, x + this.w - 4, y + 16, 'rgb(120,116,110)');
-    txt(x + 8, y + 6, 'PROMPT · 用户请求', 8, K.WHITE);
+    txt(x + 8, y + 6, T('PROMPT · 用户请求'), 8, K.WHITE);
     this.lines.forEach((s, i) => txt(x + 9, y + 22 + i * 13, s, 10, K.INK));
   }
 }
@@ -276,10 +281,10 @@ class Rulebook {
     for (let p = 0; p < this.npages; p++) {
       const L = [];
       for (const r of rules.filter((q) => q.page === p)) {
-        L.push({ s: r.head, size: 10, col: r.day === day ? K.RED_D : K.TEXT, key: r.key, isNew: r.day === day });
-        for (const s of r.subs) L.push({ s, size: 8, col: K.TEXT_L, key: r.key });
+        L.push({ s: T(r.head), size: 10, col: r.day === day ? K.RED_D : K.TEXT, key: r.key, isNew: r.day === day });
+        for (const s of r.subs) L.push({ s: s.includes('|') ? s : T(s), size: 8, col: K.TEXT_L, key: r.key });
       }
-      if (p === this.npages - 1) L.push({ s: '§12 只看地区，不看脸', size: 8, col: K.TEXT_L, key: null });
+      if (p === this.npages - 1) L.push({ s: T('§12 只看地区，不看脸'), size: 8, col: K.TEXT_L, key: null });
       let y = 22;
       const fields = {};
       for (const row of L) {
@@ -307,17 +312,17 @@ class Rulebook {
     rect(x, y, x + w - 1, y + h - 1, K.BOOK);
     rect(x + 3, y + 3, x + w - 4, y + h - 4, K.PAPER);
     rect(x + 3, y + 3, x + w - 4, y + 16, K.BOOK_L);
-    txt(x + 8, y + 5, '宪法 · 入境规则', 10, K.PAPER);
+    txt(x + 8, y + 5, T('宪法 · 入境规则'), 10, K.PAPER);
     if (this.npages > 1) {
       rect(x + this.tab[0], y + this.tab[1], x + this.tab[2], y + this.tab[3], K.BOOK);
-      txt(x + this.tab[2] - 4, y + 7, `第${this.page + 1}/${this.npages}页 ▶`, 8, K.PAPER, 'ra');
+      txt(x + this.tab[2] - 4, y + 7, T('第{0}/{1}页 ▶', this.page + 1, this.npages), 8, K.PAPER, 'ra');
     } else {
       txt(x + w - 8, y + 7, `DAY ${this.day}`, 8, K.PAPER, 'ra');
     }
     for (const r of this.pages[this.page].rows) {
       if (r.s.includes('|')) {
         const [a, b, c] = r.s.split('|');
-        txt(x + 12, y + r.y, a, 8, r.col);
+        txt(x + 12, y + r.y, T(a), 8, r.col);
         txt(x + 52, y + r.y, b, 8, r.col);
         txt(x + 150, y + r.y, c, 8, r.col);
         continue;

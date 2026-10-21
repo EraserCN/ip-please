@@ -182,8 +182,9 @@ function bigText(x, y, s, size, k, col, shadow = null, align = 'center') {
   return [w, size * k];
 }
 
-// 逐字折行
+// 逐字折行（英文按单词折）
 function wrap(s, size, width) {
+  if (LANG === 'en') return s.split('\n').flatMap((p) => wrapWords(p, size, width));
   const lines = [];
   let cur = '';
   for (const ch of s) {
@@ -194,14 +195,34 @@ function wrap(s, size, width) {
   return lines;
 }
 
+function wrapWords(s, size, width) {
+  const lines = [];
+  let cur = '';
+  for (const wd of s.split(' ')) {
+    const cand = (cur + ' ' + wd).trim();
+    if (tw(cand, size) > width && cur) { lines.push(cur); cur = wd; } else cur = cand;
+  }
+  if (cur) lines.push(cur);
+  return lines;
+}
+
 // —— 精灵 ——
 const SPR = window.ASSETS.sprites;
 
+// 英文模式下有 `key:en` 的（印章、对齐部圆印）自动换成英文版
+const sprite = (key) => (LANG === 'en' && SPR[key + ':en']) || SPR[key];
+
 function spr(key, x, y) {
-  const s = SPR[key];
+  const s = sprite(key);
   if (!s) return false;
   G.drawImage(ATLAS_IMG, s[0], s[1], s[2], s[3], x + s[4], y + s[5], s[2], s[3]);
   return true;
+}
+
+// 整屏背景；英文版再贴上横幅、路牌、宪法书的英文补丁
+function drawBg() {
+  G.drawImage(BG_IMG, 0, 0);
+  if (LANG === 'en') for (let i = 0; SPR['bg:en:' + i]; i++) spr('bg:en:' + i, 0, 0);
 }
 
 // 把一块区域往某个颜色压暗（等同 pp.base.darken）

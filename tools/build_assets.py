@@ -6,6 +6,7 @@
 
 - 字体图集：扫描根目录下所有 JS/HTML 里出现的字符，只渲染这些字（缝合像素字体 8/10/12px）
 - 精灵图集：旅客立绘（各种表情）、证件照、背景、印章等，全部复用 pp/ 里的画法
+- 英文版：带中文的印章、对齐部圆印另出一份 `:en`；背景上的中文横幅、路牌、宪法书只出两小块补丁 `bg:en:*`
 产物是一个 JS 文件（图片以 base64 内嵌），所以 index.html 直接双击也能玩。
 """
 import base64
@@ -15,7 +16,7 @@ import random
 import sys
 from pathlib import Path
 
-from PIL import Image
+from PIL import Image, ImageChops
 
 TOOLS = Path(__file__).resolve().parent
 SITE = TOOLS.parent
@@ -180,12 +181,12 @@ class Packer:
         return sheet, pos
 
 
-def seal_sprite():
+def seal_sprite(lang="zh"):
     im = Image.new("RGBA", (34, 34), (0, 0, 0, 0))
     d = draw(im)
     d.ellipse([0, 0, 33, 33], outline=SEAL, width=2)
     txt(d, (17, 8), "M.O.A.", 8, SEAL, anchor="ma")
-    txt(d, (17, 19), "对齐部", 8, SEAL, anchor="ma")
+    txt(d, (17, 19), "ALIGN" if lang == "en" else "对齐部", 8, SEAL, anchor="ma")
     return im
 
 
@@ -207,8 +208,8 @@ def title_emblem():
     return im
 
 
-def stamp_sprite(kind):
-    m = stamp_mark(kind)
+def stamp_sprite(kind, lang="zh"):
+    m = stamp_mark(kind, lang=lang)
     im = Image.new("RGBA", m.size, (RED if kind == "deny" else GREEN) + (0,))
     im.putalpha(m)
     return im
@@ -235,6 +236,20 @@ def news_icon_jorji():
     g, a = _icon(d, "jorji", 0, 0, 132, 100)
     im.paste(g, (16, -6), a)
     return im
+
+
+def bg_patches(zh, en):
+    """英文背景和中文背景不同的地方（室外一块、桌面一块），各裁成一张整屏坐标的补丁。"""
+    out = []
+    for y0, y1 in ((0, 124), (124, zh.height)):
+        bb = ImageChops.difference(zh.crop((0, y0, zh.width, y1)), en.crop((0, y0, en.width, y1))).getbbox()
+        if not bb:
+            continue
+        box = (bb[0], bb[1] + y0, bb[2], bb[3] + y0)
+        im = Image.new("RGBA", zh.size, (0, 0, 0, 0))
+        im.paste(en.crop(box), box[:2])
+        out.append(im)
+    return out
 
 
 def png_b64(im):
@@ -266,17 +281,21 @@ def main():
     people["CARPOOL"] = {"expr": grp.expr, "walker": [list(c) for c in grp.walker], "scripted": True, "fw": 300,
                          "extra": [[list(c) for c in q.walker] for q in grp.people[1:4]]}
     pk.add("seal", seal_sprite(), crop=False)
+    pk.add("seal:en", seal_sprite("en"), crop=False)
     pk.add("emblem", emblem_sprite(), crop=False)
     pk.add("title_emblem", title_emblem(), crop=False)
-    pk.add("stamp:deny", stamp_sprite("deny"), crop=False)
-    pk.add("stamp:approve", stamp_sprite("approve"), crop=False)
+    for kind in ("deny", "approve"):
+        pk.add(f"stamp:{kind}", stamp_sprite(kind), crop=False)
+        pk.add(f"stamp:{kind}:en", stamp_sprite(kind, "en"), crop=False)
     pk.add("crayon", CrayonPassport().image(), crop=False)
     for k in ("gate", "clock", "plane", "drumstick", "medal"):
         pk.add(f"news:{k}", news_icon(k), crop=False)
     pk.add("news:jorji", news_icon_jorji(), crop=False)
+    bg = static_layer().copy()
+    for i, im in enumerate(bg_patches(bg, static_layer("en"))):
+        pk.add(f"bg:en:{i}", im)
     sheet, pos = pk.build()
 
-    bg = static_layer().copy()
     wbg = window_bg().copy()
 
     blobs = {}

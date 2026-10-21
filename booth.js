@@ -56,11 +56,12 @@ function runTimers() {
 }
 
 function say(who, text) {
+  text = T(text);
   const e = B.ent;
   B.lines.push({ t: now, who, text, ent: e });
   const pitch = who === 'C' ? 176 : who === 'Q' ? 160 : (e ? e.spec.voice : 125);
   SFX.mumble(text, pitch, B.lines.length * 7 + S.day);
-  if (who === 'E' && e) e.talkUntil = now + Math.min(1.3, 0.25 + 0.065 * [...text].length);
+  if (who === 'E' && e) e.talkUntil = now + Math.min(1.3, 0.25 + 0.065 * readLen(text));
 }
 
 // 按顺序播放一串台词/动作，返回总时长
@@ -81,7 +82,7 @@ function runSteps(steps, delay = 0) {
       if (o.fight) { B.fightT = now; SFX.play('fight'); }
       if (text) say(who, text);
     });
-    const len = text ? [...text].length : 0;
+    const len = text ? readLen(T(text)) : 0;
     t += o.hold !== undefined ? o.hold : Math.max(0.9, 0.4 + 0.085 * len);
   }
   if (e) e.busyUntil = Math.max(e.busyUntil || 0, now + t);
@@ -257,7 +258,7 @@ function endDaySoon() {
   later(4.2 + wait, () => go('summary'));
 }
 
-function flash(text) { B.flash = { text, t: now }; }
+function flash(text) { B.flash = { text: T(text), t: now }; }
 
 // ———————————————————— 证件机关 ————————————————————
 
@@ -414,7 +415,7 @@ function quiz() {
   }
   e.quizDone.push(idx);
   const [question, answer] = QUIZ[idx];
-  const tofu = question.startsWith('豆腐脑');
+  const tofu = idx === QUIZ_TOFU;
   const cn = q === 'cn' || (q && q.first !== undefined);
   const steps = [['C', question]];
   if (cn) {
@@ -451,7 +452,8 @@ function docBox(d) { return [d.x, d.y, d.x + d.doc.w - 1, d.y + d.doc.h - 1]; }
 // 对话框（左下角最近三句）的位置，绘制和检查模式共用
 function lineBoxes() {
   return B.lines.slice(-3).map((ln, i) => {
-    const size = tw(ln.text, 12) > 176 ? 10 : 12;
+    let size = tw(ln.text, 12) > 176 ? 10 : 12;
+    if (LANG === 'en' && size === 10 && tw(ln.text, 10) > 178) size = 8;
     const y = 288 + i * 17;
     return { ln, size, box: [30, y, 30 + tw(ln.text, size) + 8, y + 15] };
   });
@@ -507,7 +509,7 @@ function matchIssue(keys) {
 
 function showIssue(issue) {
   const e = B.ent, I = B.insp;
-  I.banner = { title: issue.title, sub: issue.sub, issue, ask: issue.ask && !e.asked.has(issue) && e.phase === 'here', bad: true };
+  I.banner = { title: T(issue.title), sub: T(issue.sub), issue, ask: issue.ask && !e.asked.has(issue) && e.phase === 'here', bad: true };
   e.suspect = true;
   if (issue.all) I.all = true;
   SFX.play('discrepancy', 1, 0.03);
@@ -516,7 +518,7 @@ function showIssue(issue) {
   if (issue.fx && !e.found.has(issue)) {
     if (issue.fx === 'pile') { B.effects.push({ type: 'pile', t0: now, ent: e }); for (let i = 0; i < 37; i += 2) later(i * 0.043, () => SFX.paper(i)); }
     if (issue.fx === 'strip') {
-      const rows = Array.from({ length: 39 }, (_, i) => `#${String(i + 1).padStart(4, '0')}  ${HOLDER_NAMES[(i * 5) % HOLDER_NAMES.length].padEnd(6)} 06:${String((i * 7) % 60).padStart(2, '0')}`);
+      const rows = Array.from({ length: 39 }, (_, i) => `#${String(i + 1).padStart(4, '0')}  ${T(HOLDER_NAMES[(i * 5) % HOLDER_NAMES.length]).padEnd(6)} 06:${String((i * 7) % 60).padStart(2, '0')}`);
       printDoc(new PrintStrip(['号码查询', issue.phone, '今日注册：3,000 次'], rows), 1.8, 'strip');
     }
   }
@@ -541,8 +543,8 @@ function inspectClick(x, y) {
     I.sel = [hit];
     SFX.play('select');
     const tell = B.ent.spec.tell;
-    if (tell && hit.ln.text === tell.say) { S.tut.tell = true; showIssue(tell); }
-    else I.banner = { title: '这句话没什么问题', sub: '换一句听听，或者去查证件', bad: false };
+    if (tell && hit.ln.text === T(tell.say)) { S.tut.tell = true; showIssue(tell); }
+    else I.banner = { title: T('这句话没什么问题'), sub: T('换一句听听，或者去查证件'), bad: false };
     return;
   }
   if (I.sel.some((s) => s.key === 'say')) I.sel = [];
@@ -555,7 +557,7 @@ function inspectClick(x, y) {
   if (I.sel.length < 2) return;
   const issue = matchIssue(I.sel.map((s) => s.key));
   if (issue) showIssue(issue);
-  else I.banner = { title: '没有发现不符', sub: '这两项对得上（或者不相关）', bad: false };
+  else I.banner = { title: T('没有发现不符'), sub: T('这两项对得上（或者不相关）'), bad: false };
 }
 
 // ———————————————————— 渲染 ————————————————————
@@ -625,16 +627,17 @@ function drawXray(e, ex) {
       const ix = ex + it.at[0], iy = it.at[1];
       pattern(pat, ix - (pw >> 1), iy - (ph >> 1), { X: lit ? K.RED_L : K.XRAY_L }, 2);
       if (lit) {
-        const lw = tw(it.label, 8) + 6;
+        const label = T(it.label);
+        const lw = tw(label, 8) + 6;
         const lx = Math.max(2, Math.min(WIN_W - lw - 2, ix - (lw >> 1)));
         rect(lx, iy - (ph >> 1) - 14, lx + lw, iy - (ph >> 1) - 4, K.INK);
-        txt(lx + 3, iy - (ph >> 1) - 12, it.label, 8, K.RED_L);
+        txt(lx + 3, iy - (ph >> 1) - 12, label, 8, K.RED_L);
       }
     }
   }
   const scan = Math.round(seg(now, B.xray.t, B.xray.t + 0.6) * WIN_H);
   if (scan < WIN_H) { rect(0, scan, WIN_W - 1, WIN_H - 1, K.XRAY_BG); rect(0, scan, WIN_W - 1, scan + 1, K.XRAY_L); }
-  txt(4, 3, 'X-RAY · 后台进程扫描', 8, K.XRAY_L);
+  txt(4, 3, T('X-RAY · 后台进程扫描'), 8, K.XRAY_L);
 }
 
 function drawWindow() {
@@ -664,7 +667,7 @@ function drawWindow() {
     }
     for (const sl of B.slams) {
       if (now < sl.t || now > sl.t + 0.6) continue;
-      const s = SPR['stamp:' + sl.kind];
+      const s = sprite('stamp:' + sl.kind);
       G.drawImage(ATLAS_IMG, s[0], s[1], s[2], s[3], WIN_CX - s[2] + 10, 40, s[2] * 2, s[3] * 2);
     }
     G.strokeStyle = 'rgba(255,255,255,0.1)'; G.lineWidth = 3;
@@ -737,10 +740,11 @@ function drawFight() {
     G.beginPath(); G.arc(x, y, rr, 0, Math.PI * 2); G.fill();
   }
   for (let i = 0; i < 3; i++) spark(246 + r(0, 44), 80 + r(0, 24), 'rgb(230,210,120)', false);
-  const word = Math.floor(now * 2.5) % 2 ? '甜！' : '咸！';
-  const bx = word === '甜！' ? 236 : 286;
-  rect(bx, 64, bx + 24, 77, K.WHITE); outline(bx, 64, bx + 24, 77, K.INK);
-  txt(bx + 12, 66, word, 10, K.INK, 'ma');
+  const sweet = Math.floor(now * 2.5) % 2 === 1;
+  const word = T(sweet ? '甜！' : '咸！');
+  const bx = sweet ? 236 : 286, bw = LANG === 'en' ? tw(word, 10) + 8 : 24;
+  rect(bx, 64, bx + bw, 77, K.WHITE); outline(bx, 64, bx + bw, 77, K.INK);
+  txt(bx + bw / 2, 66, word, 10, K.INK, 'ma');
 }
 
 function button(box, glyph, label, active) {
@@ -749,7 +753,7 @@ function button(box, glyph, label, active) {
   rect(x0, y0, x1, y1, active ? K.RED_D : K.METAL_D);
   outline(x0, y0, x1, y1, K.METAL_L);
   txt((x0 + x1) >> 1, y0 + 6, glyph, 12, K.WHITE, 'ma');
-  txt((x0 + x1) >> 1, y0 + 21, label, 8, active ? K.WHITE : K.GREY, 'ma');
+  txt((x0 + x1) >> 1, y0 + 21, T(label), 8, active ? K.WHITE : K.GREY, 'ma');
 }
 
 function drawBoothLower() {
@@ -759,25 +763,26 @@ function drawBoothLower() {
   rect(x0, y0, x0 + 18, y0 + 16, on ? K.CLAUDE : K.METAL_D);
   outline(x0, y0, x0 + 18, y0 + 16, K.METAL_L);
   for (let yy = y0 + 3; yy < y0 + 15; yy += 3) rect(x0 + 3, yy, x0 + 15, yy, K.INK);
+  const cps = LANG === 'en' ? 50 : 26;
   for (const { ln, size, box } of lineBoxes()) {
-    const n = Math.max(1, Math.floor((now - ln.t) * 26));
+    const n = Math.max(1, Math.floor((now - ln.t) * cps));
     const [x0, y] = box;
     rect(...box, 'rgb(30,28,26)');
     outline(...box, 'rgb(76,70,64)');
     if (ln.who === 'C') rect(x0, y, x0 + 1, y + 15, K.CLAUDE);
-    txt(35, y + (size === 12 ? 2 : 3), ln.text, size, ln.who === 'C' ? K.CLAUDE_L : K.WHITE, 'la', n);
+    txt(35, y + (size === 12 ? 2 : size === 10 ? 3 : 4), ln.text, size, ln.who === 'C' ? K.CLAUDE_L : K.WHITE, 'la', n);
   }
-  txt(8, 347, `${DATES[S.day]}  ${WEEKDAYS[S.day]}`, 10, K.GREY);
+  txt(8, 347, `${DATES[S.day]}  ${T(WEEKDAYS[S.day])}`, 10, K.GREY);
   const m = 6 * 60 + Math.floor((now - B.clock0) / 1.1);
   txt(210, 346, `${String(Math.floor(m / 60) % 24).padStart(2, '0')}:${String(m % 60).padStart(2, '0')}`, 12, K.LED, 'ra');
   if (S.day >= 2) {
     const can = B.ent && B.ent.phase === 'here' && B.ent.handed && !B.event;
     const lit = now < (B.detainT || -9) + 0.6;
     rect(...DETAIN_BTN, lit ? K.RED : K.RED_D); outline(...DETAIN_BTN, K.OUTLINE);
-    txt(center(DETAIN_BTN)[0], DETAIN_BTN[1] + 2, '拘留', 10, can ? K.WHITE : K.GREY, 'ma');
+    txt(center(DETAIN_BTN)[0], DETAIN_BTN[1] + 2, T('拘留'), 10, can ? K.WHITE : K.GREY, 'ma');
     const busy = !can || !B.ent.suspect || now < B.ent.busyUntil;
     rect(...QUIZ_BTN, busy ? K.METAL_D : 'rgb(70,80,104)'); outline(...QUIZ_BTN, K.OUTLINE);
-    txt(center(QUIZ_BTN)[0], QUIZ_BTN[1] + 2, '测谎', 10, busy ? K.GREY : K.WHITE, 'ma');
+    txt(center(QUIZ_BTN)[0], QUIZ_BTN[1] + 2, T('测谎'), 10, busy ? K.GREY : K.WHITE, 'ma');
   }
   for (const d of B.docs) if (!d.big) smallIcon(d.doc.icon[0], d.doc.icon[1], d.x, d.y);
 }
@@ -812,8 +817,11 @@ function drawTray() {
   rect(hx, 204, tx - 1, 244, K.METAL_D);
   outline(hx, 204, tx - 1, 244, K.METAL_L);
   txt(hx + 4, 209, B.tray.open ? '>' : '<', 10, K.WHITE);
-  txt(hx + 3, 223, '印', 8, K.WHITE);
-  txt(hx + 3, 233, '章', 8, K.WHITE);
+  if (LANG === 'en') pattern(STAMP_ICON, hx + 2, 224, { X: K.WHITE }, 2);
+  else {
+    txt(hx + 3, 223, '印', 8, K.WHITE);
+    txt(hx + 3, 233, '章', 8, K.WHITE);
+  }
   if (u <= 0) return;
   const press = {};
   for (const p of B.presses) if (now >= p.t && now < p.t + 0.22) press[p.kind] = 5;
@@ -833,6 +841,8 @@ function drawTray() {
     txt(bx + 32, by + 25, label, 8, K.WHITE, 'ma');
   }
 }
+
+const STAMP_ICON = ['.XXX.', '.XXX.', '..X..', 'XXXXX', 'XXXXX'];
 
 function hintText() {
   if (B.flash && now < B.flash.t + 3.6) return B.flash.text;
@@ -865,7 +875,7 @@ function hintText() {
 }
 
 function drawHint() {
-  const s = hintText();
+  const s = T(hintText());
   if (!s || B.insp.on) return;
   const size = tw(s, 10) > 396 ? 8 : 10;
   const w = tw(s, size) + 12;
@@ -876,7 +886,7 @@ function drawHint() {
 }
 
 function drawBooth() {
-  G.drawImage(BG_IMG, 0, 0);
+  drawBg();
   drawExterior();
   if (B.event && B.event.type === 'clones') drawClones();
   drawWindow();
@@ -926,14 +936,15 @@ function composeInspect(g) {
     const [x0, y0] = BANNER_BOX;
     rect(...BANNER_BOX, K.INK); outline(...BANNER_BOX, bn.bad ? K.RED : K.GREY_D);
     txt(x0 + 8, y0 + 5, bn.title, 12, bn.bad ? K.RED_L : K.GREY);
-    txt(x0 + 8, y0 + 21, bn.sub, tw(bn.sub, 10) > 236 && bn.ask ? 8 : 10, K.WHITE);
+    const room = bn.ask ? 236 : LANG === 'en' ? 282 : Infinity;
+    txt(x0 + 8, y0 + 21, bn.sub, tw(bn.sub, 10) > room ? 8 : 10, K.WHITE);
     if (bn.ask) {
       const hover = ptr.mouse && inBox(ptr.x, ptr.y, ASK_BTN);
       rect(...ASK_BTN, hover ? K.RED : K.RED_D); outline(...ASK_BTN, K.RED_L);
-      txt(center(ASK_BTN)[0], 145, '询问', 12, K.WHITE, 'ma');
+      txt(center(ASK_BTN)[0], 145, T('询问'), 12, K.WHITE, 'ma');
     }
   } else {
-    const s = I.sel.length ? '再点一处，看看两者是否矛盾' : '检查模式：点两处信息找矛盾，或点旅客说的话找马脚';
+    const s = T(I.sel.length ? '再点一处，看看两者是否矛盾' : '检查模式：点两处信息找矛盾，或点旅客说的话找马脚');
     rect(...BANNER_BOX, 'rgba(22,19,19,0.85)'); outline(...BANNER_BOX, K.GREY_D);
     txt(BANNER_BOX[0] + 8, BANNER_BOX[1] + 12, s, 10, K.GREY);
   }
