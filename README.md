@@ -84,8 +84,6 @@
 
 ## Mod 说明
 
-主线仓库只接受 bug 修复和游戏体验上的优化，不接受新增游戏机制的 PR。更多 mod 制作与规范详见 [CONTRIBUTING.md](CONTRIBUTING.md)。
-
 | Mod | 作者 | 简介 | 链接 |
 |---|---|---|---|
 | **加长版 Mod** | @EraserCN（基于 ctnyanya 原作） | 完整 12 天主线破壁剧情、多重结局、8–11 天独创新规、macOS & Android 原生支持与完整双语 | [在线试玩](https://erasercn.github.io/ip-please/) · [客户端下载](https://github.com/EraserCN/ip-please/releases) |
