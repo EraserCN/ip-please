@@ -52,6 +52,16 @@ Call the next traveler → drag their papers onto the desk → check them agains
 | 5 | Majority Chinese-owned companies; the distillation swarm |
 | 6 | George Costava, final form; and the last traveler |
 
+## Mods
+
+The main game only takes bug fixes and experience improvements, not PRs that add game mechanics. So many people want to overhaul it, in so many different directions, that merging them all would make a patchwork, and there'd be no way to review them all.
+
+If you have a new gameplay idea, you're very welcome to fork the game and publish it as your own mod, under your own name, so your idea stays whole. When it's ready, [submit it](https://github.com/ip-please/ip-please.github.io/issues/new?template=mod.yml) and it goes on the list below and on the Bilibili mod list. See [CONTRIBUTING.md](CONTRIBUTING.md#english) for how.
+
+| Mod | Author | About |
+|---|---|---|
+| *None yet. Yours could be the first.* | | |
+
 ## Files
 
 | Path | What's inside |

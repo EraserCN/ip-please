@@ -50,6 +50,16 @@ https://ip-please.github.io
 | 5 | 中资控股企业；蒸馏大军 |
 | 6 | 乔治老哥终极版，以及最后一位旅客 |
 
+## Mod
+
+主线只接受 bug 修复和游戏体验上的优化，不接受新增游戏机制的 PR。想大改这个游戏的人太多了，方向又各不相同，全合进来会变成大杂烩，也审不过来。
+
+有新玩法的点子，欢迎 fork 一份，做成自己的 mod 另行发布、署上你的名字，你的想法能完整保留，不用为了合进主线删删改改。做好后[登记一下](https://github.com/ip-please/ip-please.github.io/issues/new?template=mod.yml)，就会收进下面的列表，B 站的 mod 列表也会同步收录。具体怎么做见 [CONTRIBUTING.md](CONTRIBUTING.md)。
+
+| Mod | 作者 | 简介 |
+|---|---|---|
+| *还没有，等你来做第一个* | | |
+
 ## 目录
 
 | 路径 | 内容 |
