@@ -13,7 +13,7 @@
 </p>
 
 <p align="center">
-  🎮 <a href="https://erasercn.github.io/ip-please/"><b>在线试玩</b></a> · 📦 <a href="https://github.com/EraserCN/ip-please/releases"><b>下载客户端 (macOS / Android)</b></a> · 🌐 <a href="https://ip-please.github.io/">原版页面</a>
+  🎮 <a href="https://erasercn.github.io/ip-please/"><b>在线试玩</b></a> · 📦 <a href="https://github.com/EraserCN/ip-please/releases"><b>下载客户端 (macOS / Android / iOS)</b></a> · 🌐 <a href="https://ip-please.github.io/">原版页面</a>
 </p>
 
 <p align="center">
@@ -56,6 +56,7 @@
 3. **多平台原生客户端（开箱即玩）**：
    - **macOS 原生客户端**：Universal 2 通用架构（Apple Silicon M 系列 + Intel 芯片），向下兼容至 macOS 11.0+，经 Apple 官方公证（Notarized & Stapled）；
    - **Android 原生客户端**：全屏沉浸式横屏 APK 安装包（支持 Android 7.0 ~ 14），本地离线运行，独立 keystore 签名；
+   - **iOS 原生客户端**：打包提供 `IP_PLEASE_iOS.ipa`（支持 iOS 13.0+，iPhone & iPad），支持 AltStore、Sideloadly、TrollStore、Scarlet 等工具直接安装，无缝全屏横屏；
    - 均可前往 [GitHub Releases](https://github.com/EraserCN/ip-please/releases) 直接下载。
 4. **中英双语 (i18n) 100% 完整本地化**：
    - 开局支持选择中文或英文；
@@ -104,6 +105,7 @@
 | `gfx.js` / `sfx.js` | 像素绘图 / 音效合成（全部现场合成，没有音频文件） |
 | `assets.js` | 预渲染的人物、背景、字形图集（由 `tools/build_assets.py` 生成，不要手改） |
 | `android-project/` | Android 原生工程源码（支持 Gradle 构建与 APK 导出） |
+| `ios-project/` | iOS 原生工程与自动化打包脚本（支持编译生成 IPA） |
 | `tools/` | 素材生成工具：`pp/` 是人物和场景的像素画法，`assets/fonts/` 是像素字体；`check_en.js` 查漏翻 |
 | `media/` | README 用的 logo、游戏动图，以及链接分享卡片 `og.png` |
 

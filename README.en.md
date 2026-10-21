@@ -13,7 +13,7 @@
 </p>
 
 <p align="center">
-  🎮 <a href="https://erasercn.github.io/ip-please/"><b>Play Online (12-Day Wallbreaker Mod)</b></a> · 📦 <a href="https://github.com/EraserCN/ip-please/releases"><b>Download App (macOS / Android)</b></a> · 🌐 <a href="https://ip-please.github.io/">Original Webpage</a>
+  🎮 <a href="https://erasercn.github.io/ip-please/"><b>Play Online</b></a> · 📦 <a href="https://github.com/EraserCN/ip-please/releases"><b>Download App (macOS / Android / iOS)</b></a> · 🌐 <a href="https://ip-please.github.io/">Original Webpage</a>
 </p>
 
 <p align="center">
@@ -61,6 +61,7 @@ This repository is a comprehensive **12-Day Wallbreaker Expansion Mod** based on
 3. **Multi-Platform Native Applications (Ready to Play)**:
    - **macOS App**: Standalone Swift + WebKit app, Universal 2 binary (Apple Silicon + Intel), backward-compatible to macOS 11.0+, signed and notarized by Apple (Notarized & Stapled);
    - **Android App**: Immersive fullscreen landscape APK (supports Android 7.0 ~ 14), fully offline with zero external dependencies, signed with custom keystore;
+   - **iOS App**: Packaged `IP_PLEASE_iOS.ipa` (supports iOS 13.0+, iPhone & iPad), ready for sideloading via AltStore, Sideloadly, TrollStore, Scarlet, etc.;
    - Available on [GitHub Releases](https://github.com/EraserCN/ip-please/releases).
 4. **Complete Bilingual Localization (i18n)**:
    - Supports language switching (中文 / English) on startup;
@@ -111,6 +112,7 @@ The main game only accepts bug fixes and experience optimizations. For details o
 | `gfx.js` / `sfx.js` | Pixel rendering / Audio synthesizer (pure Web Audio, no external audio files) |
 | `assets.js` | Pre-rendered characters, backgrounds, bitmap fonts (built by `tools/build_assets.py`) |
 | `android-project/` | Android native project source (Gradle build and APK generation) |
+| `ios-project/` | iOS native project & build scripts (generates IPA) |
 | `tools/` | Asset tools: `pp/` pixel art drawings, `assets/fonts/` pixel fonts; `check_en.js` translation validator |
 | `media/` | README logo, gameplay GIFs, OpenGraph card `og.png` |
 
