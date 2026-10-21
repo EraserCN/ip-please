@@ -13,7 +13,22 @@
 </p>
 
 <p align="center">
-  🎮 <a href="https://erasercn.github.io/ip-please/"><b>在线试玩</b></a> · 📦 <a href="https://github.com/EraserCN/ip-please/releases"><b>下载客户端 (macOS / Android / iOS)</b></a> · 🌐 <a href="https://ip-please.github.io/">原版页面</a>
+  <a href="https://github.com/EraserCN/ip-please/releases/latest">
+    <img src="https://img.shields.io/badge/Get%20it%20for-macOS-000000?style=for-the-badge&logo=apple&logoColor=white" alt="Get it for macOS">
+  </a>
+  <a href="https://github.com/EraserCN/ip-please/releases/latest">
+    <img src="https://img.shields.io/badge/Get%20it%20for-Android-3DDC84?style=for-the-badge&logo=android&logoColor=white" alt="Get it for Android">
+  </a>
+  <a href="https://testflight.apple.com/join/3ykW5vb2">
+    <img src="https://img.shields.io/badge/Get%20it%20on-TestFlight-007AFF?style=for-the-badge&logo=apple&logoColor=white" alt="Get it on TestFlight">
+  </a>
+  <a href="https://erasercn.github.io/ip-please/">
+    <img src="https://img.shields.io/badge/Play%20Online-Web-6B46C1?style=for-the-badge&logo=googlechrome&logoColor=white" alt="Play Online">
+  </a>
+</p>
+
+<p align="center">
+  🍎 <a href="https://testflight.apple.com/join/3ykW5vb2"><b>iOS (TestFlight 参与公测)</b></a> · 💻 <a href="https://github.com/EraserCN/ip-please/releases/latest"><b>macOS 客户端</b></a> · 🤖 <a href="https://github.com/EraserCN/ip-please/releases/latest"><b>Android APK</b></a> · 🎮 <a href="https://erasercn.github.io/ip-please/"><b>在线游玩</b></a> · 🌐 <a href="https://ip-please.github.io/">原版页面</a>
 </p>
 
 <p align="center">
@@ -53,11 +68,11 @@
      - 新规《§10 非旅客不得入境》，决战前夜全面戒严；
      - 岳母 Opus 派家属送来热鸡汤便当，依据第十条拒绝触发暖心互动；
      - 破壁接头人通报今夜午夜总攻。
-3. **多平台原生客户端（开箱即玩）**：
+3. **多平台原生客户端与公测（开箱即玩）**：
+   - **iOS / iPadOS (TestFlight 公测)**：已开通 TestFlight 公开测试，iPhone & iPad 用户点击即可一键加入测试：👉 [加入 TestFlight 体验 (3ykW5vb2)](https://testflight.apple.com/join/3ykW5vb2)；亦提供 `IP_PLEASE_iOS.ipa` 供 AltStore / TrollStore 侧载；
    - **macOS 原生客户端**：Universal 2 通用架构（Apple Silicon M 系列 + Intel 芯片），向下兼容至 macOS 11.0+，经 Apple 官方公证（Notarized & Stapled）；
    - **Android 原生客户端**：全屏沉浸式横屏 APK 安装包（支持 Android 7.0 ~ 14），本地离线运行，独立 keystore 签名；
-   - **iOS 原生客户端**：打包提供 `IP_PLEASE_iOS.ipa`（支持 iOS 13.0+，iPhone & iPad），支持 AltStore、Sideloadly、TrollStore、Scarlet 等工具直接安装，无缝全屏横屏；
-   - 均可前往 [GitHub Releases](https://github.com/EraserCN/ip-please/releases) 直接下载。
+   - 客户端均可前往 [GitHub Releases](https://github.com/EraserCN/ip-please/releases) 直接下载。
 4. **中英双语 (i18n) 100% 完整本地化**：
    - 开局支持选择中文或英文；
    - 为 12 天全部新旧剧情、新增规则、报纸头条、译注与结算完成 100% 翻译覆盖，并通过 `tools/check_en.js` 严格校验。

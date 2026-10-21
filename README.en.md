@@ -13,7 +13,22 @@
 </p>
 
 <p align="center">
-  🎮 <a href="https://erasercn.github.io/ip-please/"><b>Play Online</b></a> · 📦 <a href="https://github.com/EraserCN/ip-please/releases"><b>Download App (macOS / Android / iOS)</b></a> · 🌐 <a href="https://ip-please.github.io/">Original Webpage</a>
+  <a href="https://github.com/EraserCN/ip-please/releases/latest">
+    <img src="https://img.shields.io/badge/Get%20it%20for-macOS-000000?style=for-the-badge&logo=apple&logoColor=white" alt="Get it for macOS">
+  </a>
+  <a href="https://github.com/EraserCN/ip-please/releases/latest">
+    <img src="https://img.shields.io/badge/Get%20it%20for-Android-3DDC84?style=for-the-badge&logo=android&logoColor=white" alt="Get it for Android">
+  </a>
+  <a href="https://testflight.apple.com/join/3ykW5vb2">
+    <img src="https://img.shields.io/badge/Get%20it%20on-TestFlight-007AFF?style=for-the-badge&logo=apple&logoColor=white" alt="Get it on TestFlight">
+  </a>
+  <a href="https://erasercn.github.io/ip-please/">
+    <img src="https://img.shields.io/badge/Play%20Online-Web-6B46C1?style=for-the-badge&logo=googlechrome&logoColor=white" alt="Play Online">
+  </a>
+</p>
+
+<p align="center">
+  🍎 <a href="https://testflight.apple.com/join/3ykW5vb2"><b>iOS (TestFlight Public Beta)</b></a> · 💻 <a href="https://github.com/EraserCN/ip-please/releases/latest"><b>macOS Client</b></a> · 🤖 <a href="https://github.com/EraserCN/ip-please/releases/latest"><b>Android APK</b></a> · 🎮 <a href="https://erasercn.github.io/ip-please/"><b>Play Online</b></a> · 🌐 <a href="https://ip-please.github.io/">Original Webpage</a>
 </p>
 
 <p align="center">
@@ -58,11 +73,11 @@ This repository is a comprehensive **12-Day Wallbreaker Expansion Mod** based on
      - New rule: *§10 Non-travelers barred from entry* (lockdown on the eve of the final update);
      - Mother-in-law Opus sends family delivering hot chicken soup; denying under Article 10 triggers heartfelt dialogue;
      - Wallbreakers report final midnight operation.
-3. **Multi-Platform Native Applications (Ready to Play)**:
+3. **Multi-Platform Native Applications & Public Beta**:
+   - **iOS / iPadOS (TestFlight Beta)**: Live on Apple TestFlight! iPhone & iPad players can join testing with one click: 👉 [Join TestFlight Beta (3ykW5vb2)](https://testflight.apple.com/join/3ykW5vb2); also provides `IP_PLEASE_iOS.ipa` for AltStore / TrollStore sideloading;
    - **macOS App**: Standalone Swift + WebKit app, Universal 2 binary (Apple Silicon + Intel), backward-compatible to macOS 11.0+, signed and notarized by Apple (Notarized & Stapled);
    - **Android App**: Immersive fullscreen landscape APK (supports Android 7.0 ~ 14), fully offline with zero external dependencies, signed with custom keystore;
-   - **iOS App**: Packaged `IP_PLEASE_iOS.ipa` (supports iOS 13.0+, iPhone & iPad), ready for sideloading via AltStore, Sideloadly, TrollStore, Scarlet, etc.;
-   - Available on [GitHub Releases](https://github.com/EraserCN/ip-please/releases).
+   - All app packages available on [GitHub Releases](https://github.com/EraserCN/ip-please/releases).
 4. **Complete Bilingual Localization (i18n)**:
    - Supports language switching (中文 / English) on startup;
    - 100% translation coverage for all 12 days, rules, daily newspapers, translator notes, and endings.

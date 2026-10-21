@@ -20,7 +20,7 @@
 		7F12C9C072476BCC3BCE3C28 /* web */ = {isa = PBXFileReference; lastKnownFileType = folder; name = web; path = Resources/web; sourceTree = SOURCE_ROOT; };
 		AD72AFB1A5A5118B5D60C421 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		CC0955910FCE9235736F504E /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
-		D955461A4084C4A454D0426A /* IP_PLEASE.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = IP_PLEASE.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		D955461A4084C4A454D0426A /* IP, PLEASE.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "IP, PLEASE.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		DCDD308289317E82F9B453E7 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -47,7 +47,7 @@
 		322ECF63F5C922AC08848C92 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				D955461A4084C4A454D0426A /* IP_PLEASE.app */,
+				D955461A4084C4A454D0426A /* IP, PLEASE.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -80,7 +80,7 @@
 			packageProductDependencies = (
 			);
 			productName = IP_PLEASE;
-			productReference = D955461A4084C4A454D0426A /* IP_PLEASE.app */;
+			productReference = D955461A4084C4A454D0426A /* IP, PLEASE.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -91,12 +91,6 @@
 			attributes = {
 				BuildIndependentTargetsInParallel = YES;
 				LastUpgradeCheck = 1600;
-				TargetAttributes = {
-					C91705627814AC3BF44BDAA1 = {
-						DevelopmentTeam = 86YQUSBAP7;
-						ProvisioningStyle = Automatic;
-					};
-				};
 			};
 			buildConfigurationList = C7BB24CD35A02113A6DC4946 /* Build configuration list for PBXProject "IP_PLEASE" */;
 			developmentRegion = en;
@@ -147,9 +141,9 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				CODE_SIGN_IDENTITY = "Apple Development: Yu Liang (86YQUSBAP7)";
+				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = 86YQUSBAP7;
+				DEVELOPMENT_TEAM = KFN7252LS8;
 				ENABLE_BITCODE = NO;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = App/Info.plist;
@@ -159,6 +153,7 @@
 					"@executable_path/Frameworks",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.erasercn.ipplease;
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
@@ -295,9 +290,9 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				CODE_SIGN_IDENTITY = "Apple Development: Yu Liang (86YQUSBAP7)";
+				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = 86YQUSBAP7;
+				DEVELOPMENT_TEAM = KFN7252LS8;
 				ENABLE_BITCODE = NO;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = App/Info.plist;
@@ -307,6 +302,7 @@
 					"@executable_path/Frameworks",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.erasercn.ipplease;
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
