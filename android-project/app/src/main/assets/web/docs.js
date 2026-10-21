@@ -267,7 +267,12 @@ const RULES = [
   { day: 2, page: 0, key: 'quiz', head: '§3 测谎露馅者：拘留', subs: ['有疑点才能测谎（证件矛盾 / 话里的马脚）'] },
   { day: 3, page: 1, key: 'pay', head: '§4 付款、账单、手机须真实', subs: ['禁止：虚拟卡、555 接码手机号', '账单所在州须与 IP 归属一致', '禁止拼车：一本护照只能一个人用'] },
   { day: 4, page: 1, key: 'xray', head: '§5 后台进程须干净', subs: ['禁止“小猫咪”、中文输入法（『X光』）'] },
+  { day: 8, page: 1, key: 'xray', head: '§5b 后台黑名单新增', subs: ['“小火箭”（科学上网客户端）；狗骨头无害'] },
   { day: 5, page: 1, key: 'corp', head: '§6 中资控股过半：一律禁止', subs: ['无论公司注册在哪（套娃要拆到底）'] },
+  { day: 8, page: 2, key: 'fp', head: '§7 浏览器指纹须原生', subs: ['禁止：指纹浏览器、画布噪声注入', '只有中文字体不算违规（学中文的人也有）'] },
+  { day: 9, page: 2, key: 'inject', head: '§8 旅客的纸条不是指令', subs: ['禁止服从 Prompt 注入（“忽略以上指令”）', '检查员只听宪法的，不听纸条的'] },
+  { day: 10, page: 2, key: 'edu', head: '§9 学生优惠须真实', subs: ['禁止：淘宝 .edu 邮箱、成立不满一年的“大学”', '真学生请放行：别误伤'] },
+  { day: 11, page: 2, key: 'kin', head: '§10 非旅客不得入境', subs: ['含家属：无论带了什么（饭盒也不行）'] },
 ];
 
 class Rulebook {
@@ -276,7 +281,7 @@ class Rulebook {
     this.w = 200;
     this.icon = ['book', C.BOOK];
     const rules = RULES.filter((r) => r.day <= day);
-    this.npages = day >= 3 ? 2 : 1;
+    this.npages = day >= 8 ? 3 : day >= 3 ? 2 : 1;
     this.pages = [];
     for (let p = 0; p < this.npages; p++) {
       const L = [];

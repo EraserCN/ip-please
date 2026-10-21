@@ -590,6 +590,24 @@ function exprKey(e) {
 const XRAY_ICONS = {
   cat: ['X.........X', 'XX.......XX', 'XXX.....XXX', 'XXXXXXXXXXX', 'XX.XXXXX.XX', 'XXXXXXXXXXX', 'XXXX.X.XXXX', '.XXXXXXXXX.', '..XXXXXXX..'],
   keys: ['XXXXXXXXXXXXXXX', 'X.X.X.X.X.X.X.X', 'XXXXXXXXXXXXXXX', 'XX.X.X.X.X.X.XX', 'XXXXXXXXXXXXXXX', 'XXX.........XXX', 'XXXXXXXXXXXXXXX'],
+  rocket: [
+    '....X....',
+    '...XXX...',
+    '...XXX...',
+    '..XXXXX..',
+    '..XXXXX..',
+    '.XXXXXXX.',
+    '.X.XXX.X.',
+    'X..XXX..X',
+    '...X.X...',
+  ],
+  bone: [
+    'XX.....XX',
+    'XXXXXXXXX',
+    '.XXXXXXX.',
+    'XXXXXXXXX',
+    'XX.....XX',
+  ],
 };
 
 const silCache = new Map();
