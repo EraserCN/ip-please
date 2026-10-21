@@ -2,3 +2,7 @@ __pycache__/
 *.pyc
 .DS_Store
 dist/
+android-project/build/
+android-project/app/build/
+android-project/.gradle/
+android-project/local.properties

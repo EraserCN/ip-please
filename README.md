@@ -1,5 +1,5 @@
 <p align="center">
-  <a href="https://ip-please.github.io"><img src="media/logo.png" width="160" alt="IP, PLEASE"></a>
+  <img src="media/logo.png" width="160" alt="IP, PLEASE">
 </p>
 
 <h1 align="center">IP, PLEASE · 请出示你的 IP（12 天破壁版）</h1>
@@ -18,10 +18,6 @@
 </p>
 
 <p align="center">
-  <a href="https://ip-please.github.io"><b>▶ 在线玩：ip-please.github.io</b></a>
-</p>
-
-<p align="center">
   <img src="media/gameplay-zh.gif" width="640" alt="游戏画面：旅客说“Hello, I am 美国人。”，检查发现他的时区是北京时间；测谎时他脱口接上“一百八一杯”，盖上拒绝章后墨镜滑了下来">
   <br>
   <sub>Day 2：“Hello, I am 美国人。”</sub>
@@ -31,6 +27,7 @@
 - 中文 / English 双语支持，开局选择（英文版里外国人看不懂的梗，在每天报纸的译注里解释）
 - 手机横屏用手指、电脑用鼠标拖证件
 - 纯静态网页，不加载任何外部资源；下载仓库后直接双击 `index.html` 也能玩
+- **多平台原生客户端**：已提供 macOS（Universal 2，支持 Apple Silicon 与 Intel，兼容 macOS 11.0+ 并通过 Apple 官方公证）与 Android 原生 APK 安装包（请前往 Releases 下载）
 
 ## 玩法与剧情分支
 
