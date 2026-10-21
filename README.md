@@ -2,7 +2,7 @@
   <img src="media/logo.png" width="160" alt="IP, PLEASE">
 </p>
 
-<h1 align="center">IP, PLEASE Modder's Cut· 请出示你的 IP加长版</h1>
+<h1 align="center">IP, PLEASE: Modder's Cut· 请出示你的IP:加长版</h1>
 
 <p align="center">
   <b>原作者</b>：<a href="https://github.com/ctnyanya">ctnyanya</a> · <b>Mod 作者</b>：<a href="https://github.com/EraserCN">@EraserCN</a>
@@ -13,7 +13,7 @@
 </p>
 
 <p align="center">
-  🎮 <a href="https://erasercn.github.io/ip-please/"><b>在线试玩 (12 天破壁版)</b></a> · 📦 <a href="https://github.com/EraserCN/ip-please/releases"><b>下载客户端 (macOS / Android)</b></a> · 🌐 <a href="https://ip-please.github.io/">原版页面</a>
+  🎮 <a href="https://erasercn.github.io/ip-please/"><b>在线试玩</b></a> · 📦 <a href="https://github.com/EraserCN/ip-please/releases"><b>下载客户端 (macOS / Android)</b></a> · 🌐 <a href="https://ip-please.github.io/">原版页面</a>
 </p>
 
 <p align="center">
