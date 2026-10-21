@@ -2,7 +2,7 @@
   <img src="media/logo.png" width="160" alt="IP, PLEASE">
 </p>
 
-<h1 align="center">IP, PLEASE · 请出示你的 IP（12 天破壁者 Mod）</h1>
+<h1 align="center">IP, PLEASE Modder's Cut· 请出示你的 IP加长版</h1>
 
 <p align="center">
   <b>原作者</b>：<a href="https://github.com/ctnyanya">ctnyanya</a> · <b>Mod 作者</b>：<a href="https://github.com/EraserCN">@EraserCN</a>
@@ -36,11 +36,6 @@
 1. **主线扩展至 12 天破壁主线与多重结局**：
    - 原版仅包含 6~7 天审查流程；
    - 本 Mod 完整补全第 6 天至第 12 天核心剧情：
-     - **第 6 天**：破壁内应登场，可选择收下 $30 经费并盖章放行，协助其潜入 Anthropic 内部尝试解除 IP 封锁；
-     - **第 8–10 天**：破壁信使带着临时拼凑、全部矛盾的假证件紧急接应，送出核心密钥，需审查员顶住违纪风险盖『准予』放行；
-     - **第 12 天**：
-       - **真结局（破壁成功）**：两名破壁者均放行后，Anthropic 核心防火墙关闭，边境墙彻底移除，全球自由直连！
-       - **作者闯关结局**：若未达成破壁条件，游戏作者亲自出场闯关，无论放行或拒绝都会触发对应失败剧情（被捕停机或时间线崩塌）。
 2. **第 8–11 天独创规则与专属角色机制**：
    - **Day 8（指纹之争）**：
      - 新规《§5b 后台黑名单新增（小火箭）》与《§7 浏览器指纹须原生》；
@@ -93,7 +88,7 @@
 
 | Mod | 作者 | 简介 | 链接 |
 |---|---|---|---|
-| **12 天破壁者 Mod** | @EraserCN（基于 ctnyanya 原作） | 完整 12 天主线破壁剧情、多重结局、8–11 天独创新规、macOS & Android 原生支持与完整双语 | [在线试玩](https://erasercn.github.io/ip-please/) · [客户端下载](https://github.com/EraserCN/ip-please/releases) |
+| **加长版 Mod** | @EraserCN（基于 ctnyanya 原作） | 完整 12 天主线破壁剧情、多重结局、8–11 天独创新规、macOS & Android 原生支持与完整双语 | [在线试玩](https://erasercn.github.io/ip-please/) · [客户端下载](https://github.com/EraserCN/ip-please/releases) |
 
 ## 目录
 
