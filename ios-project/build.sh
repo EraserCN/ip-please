@@ -41,7 +41,8 @@ cp "$ROOT_DIR"/*.txt "$APP_DIR/web/" 2>/dev/null || true
 cp "$ROOT_DIR"/LICENSE "$APP_DIR/web/" 2>/dev/null || true
 
 # 5. Sign App Bundle
-IDENTITY_HASH=$(security find-identity -v -p codesigning 2>/dev/null | grep -E "Apple Development|iPhone Developer" | head -n 1 | awk '{print $2}')
+YU_LIANG_HASH=$(security find-identity -v -p codesigning 2>/dev/null | grep -i "Yu Liang" | head -n 1 | awk '{print $2}')
+IDENTITY_HASH=${YU_LIANG_HASH:-$(security find-identity -v -p codesigning 2>/dev/null | grep -E "Apple Development|iPhone Developer" | head -n 1 | awk '{print $2}')}
 
 if [ -n "$IDENTITY_HASH" ]; then
   echo "Signing with identity hash: $IDENTITY_HASH"

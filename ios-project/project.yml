@@ -1,0 +1,37 @@
+name: IP_PLEASE
+options:
+  bundleIdPrefix: com.erasercn
+  deploymentTarget:
+    iOS: "15.0"
+  xcodeVersion: "16.0"
+
+settings:
+  base:
+    DEVELOPMENT_TEAM: 86YQUSBAP7
+    CODE_SIGN_STYLE: Automatic
+    PRODUCT_NAME: "IP, PLEASE"
+    CURRENT_PROJECT_VERSION: 1
+    MARKETING_VERSION: "1.3.1"
+    SWIFT_VERSION: "5.0"
+
+targets:
+  IP_PLEASE:
+    type: application
+    platform: iOS
+    deploymentTarget: "15.0"
+    sources:
+      - path: App
+      - path: Resources/Assets.xcassets
+      - path: Resources/web
+        type: folder
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.erasercn.ipplease
+        INFOPLIST_FILE: App/Info.plist
+        DEVELOPMENT_TEAM: 86YQUSBAP7
+        CODE_SIGN_STYLE: Automatic
+        CODE_SIGN_IDENTITY: "Apple Development: Yu Liang (86YQUSBAP7)"
+        TARGETED_DEVICE_FAMILY: "1,2"
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        ENABLE_BITCODE: NO
+        GENERATE_INFOPLIST_FILE: NO
