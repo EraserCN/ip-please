@@ -1,0 +1,57 @@
+name: 登记 mod / Submit a mod
+description: 把你的 mod 加进 README 和 B 站的 mod 列表 / Get your mod on the mod list
+title: "[Mod] "
+labels: ["mod"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        谢谢你做了 mod！填完这张表，会把它收进 README 和 B 站的 mod 列表。怎么做 mod 见 [CONTRIBUTING.md](https://github.com/ip-please/ip-please.github.io/blob/main/CONTRIBUTING.md)。
+        Thanks for making a mod! Fill this in to get it listed. How-to: [CONTRIBUTING.md](https://github.com/ip-please/ip-please.github.io/blob/main/CONTRIBUTING.md#english).
+  - type: input
+    id: name
+    attributes:
+      label: Mod 名称 / Name
+      placeholder: "IP, PLEASE：无尽模式"
+    validations:
+      required: true
+  - type: input
+    id: play
+    attributes:
+      label: 在哪里玩 / Where to play
+      description: 网页地址或下载地址 / Web link or download link
+      placeholder: "https://你的用户名.github.io/仓库名/"
+    validations:
+      required: true
+  - type: input
+    id: source
+    attributes:
+      label: 源码 / Source
+      placeholder: "https://github.com/你的用户名/仓库名"
+  - type: input
+    id: author
+    attributes:
+      label: 署名 / Credit as
+      description: 列表上显示的名字，有 B 站账号的话也写上，推荐时会 @ 你 / Name to show; add your Bilibili account if you have one
+  - type: textarea
+    id: about
+    attributes:
+      label: 介绍 / About
+      description: 一两句话，说清楚加了什么。有英文介绍的话也写上，会放进英文 README / One or two lines on what it adds; English goes into the English README
+    validations:
+      required: true
+  - type: textarea
+    id: screenshot
+    attributes:
+      label: 截图（可选）/ Screenshot (optional)
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: 确认 / Checklist
+      options:
+        - label: "游戏或 README 里写明了这是 mod，并附上原版链接 / It says it's a mod and links to the original"
+          required: true
+        - label: "保留了 LICENSE 和 OFL-fusion-pixel.txt / LICENSE and OFL-fusion-pixel.txt are kept"
+          required: true
+        - label: "内容守住宪法第 12 条：只看地区，不看脸 / It keeps to Article 12: judge the region, not the face"
+          required: true

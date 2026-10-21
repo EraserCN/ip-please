@@ -1,7 +1,7 @@
 'use strict';
 // 检查亭以外的画面：开场、标题、日期卡、报纸、下班结算、结局、片尾。（开局选语言在 i18n.js）
 
-const SAVE_KEY = 'ip-please-save-v2';
+const SAVE_KEY = 'ip-please-mod-rebel12-v1';
 
 function newGame() {
   for (const k of Object.keys(S)) delete S[k];
