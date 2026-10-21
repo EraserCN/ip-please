@@ -118,6 +118,13 @@ function titleClick(x, y) {
   if (inBox(x, y, NEWGAME_TITLE)) { clearSave(); newGame(); go('daycard'); }
 }
 
+function drawDayCard(t) {
+  rect(0, 0, W - 1, H - 1, K.INK);
+  if (t < 0.55) return;
+  bigText(W / 2, 132, `DAY ${S.day}`, 12, 4, K.WHITE);
+  txt(W / 2, 196, `${DATES[S.day]}  ${T(WEEKDAYS[S.day])}`, 10, K.GREY, 'ma');
+}
+
 function drawNews(t) {
   const n = { ...NEWS[S.day] };
   if (S.day === 6 && S.flags.bribed) n.h2 = '地下中转联盟：感谢某位审查员的“合作”';
