@@ -38,6 +38,10 @@ SLANG = [
 ]
 HOOD = Person(skin="mid", hair="none", hat="hood", hat_color=(52, 52, 58), top="hoodie", top_color=(52, 52, 58),
               mystery=True)
+REBEL1 = Person(skin="light", face="oval", hair="side", eyes="glasses", hat="hood", hat_color=(42, 54, 68),
+                top="hoodie", top_color=(42, 54, 68), expr="nervous")
+REBEL2 = Person(skin="tan", face="square", hair="short", eyes="sunglasses", hat="cap", hat_color=(48, 66, 52),
+                top="jacket", top_color=(58, 76, 62), inner=(190, 186, 174), expr="nervous")
 SG_MAN = Person(skin="light", face="long", hair="slick", hair_color=(30, 26, 24), top="suit",
                 top_color=(40, 46, 64), tie=(140, 40, 40), expr="smile")
 RELAY = Person(skin="mid", face="square", hair="slick", hair_color=(24, 22, 22), eyes="sunglasses",

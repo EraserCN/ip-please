@@ -136,7 +136,7 @@ function accountCard(pay, bill, phone) {
     { title: '账户卡', sub: 'ACCOUNT', color: C.SAGE, colorD: C.SAGE_D, seal: false });
 }
 
-// 夹在护照里的小纸条（地下中转联盟）
+// 夹在护照里的小纸条（地下中转联盟 / 破壁行动组）
 class Note {
   constructor(lines) {
     this.lines = lines;
@@ -152,6 +152,29 @@ class Note {
     G.fillStyle = K.DESK_D;
     G.beginPath(); G.moveTo(x + this.w - 8, y); G.lineTo(x + this.w, y); G.lineTo(x + this.w, y + 8); G.fill();
     this.lines.forEach((s, i) => txt(x + 8, y + 7 + i * 13, s, 10, 'rgb(70,70,96)'));
+  }
+}
+
+// 破壁者塞过来的钞票 / 经费券（Papers, Please 风格）
+class CashSlip {
+  constructor(amount = 30) {
+    this.amount = amount;
+    this.w = 128;
+    this.h = 52;
+    this.icon = ['card', [168, 198, 156]];
+    this.fields = {};
+  }
+
+  draw(x, y) {
+    const { w, h } = this;
+    docShadow(x, y, w, h);
+    rect(x, y, x + w - 1, y + h - 1, K.GREEN_D);
+    rect(x + 2, y + 2, x + w - 3, y + h - 3, 'rgb(212,226,198)');
+    outline(x + 5, y + 5, x + w - 6, y + h - 6, K.GREEN);
+    spark(x + 20, y + 26, K.GREEN_D, false);
+    txt(x + 34, y + 9, `TOKEN 经费 · $${this.amount}`, 10, K.GREEN_D);
+    txt(x + 34, y + 24, '破壁行动组内部资助', 8, K.TEXT);
+    txt(x + 34, y + 36, '（准予放行即入账）', 8, K.RED_D);
   }
 }
 

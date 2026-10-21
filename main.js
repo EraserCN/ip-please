@@ -111,6 +111,13 @@ function dragEnd(x, y) {
   }
   // 拖回了窗口那一侧
   if (['cit', 'strip'].includes(d.key)) { B.docs = B.docs.filter((o) => o !== d); SFX.paper(3); return; }
+  if (d.key === 'rebel_note' || d.key === 'cash') {
+    Object.assign(d, prev);
+    d.big = true;
+    SFX.paper(3);
+    flash('纸条和经费留在桌上即可（在护照上盖『准予』并把护照还给旅客）');
+    return;
+  }
   if (d.key === 'note') {
     B.docs = B.docs.filter((o) => o !== d);
     SFX.paper(3);
@@ -153,11 +160,15 @@ function update() {
     runTimers();
     if (B.cut) updateChat();
     if (B.event && B.event.type === 'clones') updateClones();
-    const idle = !B.ent && !B.event && !B.cut && !B.closeup && !B.ending;
+    const idle = !B.ent && !B.event && !B.cut && !B.closeup && !B.ending && !B.borderRemoved;
     if (idle && isEvent(nextItem()) && now > B.lastFinish + 1.6) startEvent(B.queue[B.idx++]);
   }
   if (scene === 'intro') { typedSounds(INTRO_LINES); if (st() > INTRO_LINES.end) go('title'); }
-  if (scene === 'erased') { typedSounds(ERASED_LINES); if (st() > ERASED_LINES.end + 1) go('end'); }
+  if (scene === 'erased') {
+    const lines = currentErasedLines();
+    typedSounds(lines);
+    if (st() > lines.end + 1) go('end');
+  }
   if (scene === 'daycard' && st() > 1.9) go('news');
 }
 
@@ -166,7 +177,7 @@ function render() {
   const t = st();
   if (scene === 'boot') drawBoot();
   else if (scene === 'intro') drawTyped(INTRO_LINES);
-  else if (scene === 'erased') drawTyped(ERASED_LINES);
+  else if (scene === 'erased') drawTyped(currentErasedLines());
   else if (scene === 'title') drawTitle(t);
   else if (scene === 'daycard') drawDayCard(t);
   else if (scene === 'news') drawNews(t);

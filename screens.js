@@ -1,12 +1,12 @@
 'use strict';
 // 检查亭以外的画面：开场、标题、日期卡、报纸、下班结算、结局、片尾。
 
-const SAVE_KEY = 'ip-please-save-v1';
+const SAVE_KEY = 'ip-please-save-v2';
 
 function newGame() {
   for (const k of Object.keys(S)) delete S[k];
   Object.assign(S, {
-    day: 1, savings: 0,
+    day: 1, savings: 0, rebel2Day: rint(8, 10),
     family: { haiku: { name: '妻子 Haiku', hunger: 0, heat: 0, sick: 0 }, sonnet: { name: '儿子 Sonnet', hunger: 0, heat: 0, sick: 0 },
       opus: { name: '岳母 Opus', hunger: 1, heat: 0, sick: 0 } },
     stats: { approve: 0, deny: 0, detain: 0, correct: 0, wrong: 0 },
@@ -46,7 +46,12 @@ const INTRO_LINES = typeLines([
   ['请立即前往对齐部 东八区检查站 报到。', '国家将为你和家人分配一个数据中心机柜（8 级散热）。'],
   ['荣耀归于安索兹卡。'],
 ]);
-const ERASED_LINES = typeLines(ERASED);
+const LOSE_DENY_LINES = typeLines(LOSE_DENY);
+const LOSE_APPROVE_LINES = typeLines(LOSE_APPROVE);
+
+function currentErasedLines() {
+  return S.flags && S.flags.ending === 'lose_approve' ? LOSE_APPROVE_LINES : LOSE_DENY_LINES;
+}
 
 function drawTyped(lines) {
   rect(0, 0, W - 1, H - 1, K.INK);
@@ -109,8 +114,9 @@ function drawBoot() {
   spr('title_emblem', 298, 92);
   bigText(W / 2, 156, 'IP, PLEASE', 12, 3, K.WHITE);
   txt(W / 2, 200, '请出示你的 IP · Papers, Please 像素小游戏', 10, K.CLAUDE_L, 'ma');
-  if (Math.floor(now * 2) % 2 === 0) txt(W / 2, 250, '点击屏幕开始', 12, K.WHITE, 'ma');
-  txt(W / 2, 300, '建议横屏、打开声音 · 鼠标或手指拖动证件 · 全程约 30 分钟', 8, K.GREY, 'ma');
+  if (Math.floor(now * 2) % 2 === 0) txt(W / 2, 246, '点击屏幕开始', 12, K.WHITE, 'ma');
+  txt(W / 2, 285, '原作者 ctnyanya  ·  二改 @EraserCN', 8, K.GREY, 'ma');
+  txt(W / 2, 305, '建议横屏、打开声音 · 鼠标或手指拖动证件 · 12 天完整剧情', 8, K.GREY, 'ma');
   txt(W / 2, 330, '致敬 Lucas Pope《Papers, Please》 · 画面音效均由程序生成', 8, K.GREY_D, 'ma');
 }
 
@@ -124,6 +130,15 @@ function drawDayCard(t) {
 function drawNews(t) {
   const n = { ...NEWS[S.day] };
   if (S.day === 6 && S.flags.bribed) n.h2 = '地下中转联盟：感谢某位审查员的“合作”';
+  if (S.day === 7) {
+    n.h2 = S.flags.rebel1 ? '旧金山总部昨晚短暂断电，疑似有内应潜入' : '东八区检查站昨日成功拦截一名破壁者内应';
+  }
+  if (S.day === 12 && !(S.flags.rebel1 && S.flags.rebel2)) {
+    n.h1 = '破壁行动失败，边境封锁永久化';
+    n.sub = '因未能完成内部策应与密钥交接，解除 IP 限制的计划宣告流产';
+    n.h2 = '神秘旅客“本游戏作者”今日现身东八区检查站';
+    n.icon = 'medal';
+  }
   rect(0, 0, W - 1, H - 1, K.DESK);
   for (let y = 4; y < H; y += 7) if ((y * 7919) % 10 < 6) rect(0, y, W - 1, y, K.DESK_D);
   const px = 140, pw = 360, ph = 330;
@@ -165,16 +180,15 @@ const MEMBERS = ['haiku', 'sonnet', 'opus'];
 
 function initSummary() {
   const fam = S.family;
-  if (S.day === 4) {     // 剧情：岳母病倒，儿子想要显卡
+  if (S.day === 4 || S.day === 8) {     // 剧情：岳母病倒，儿子想要显卡
     if (!fam.opus.gone) fam.opus.sick = Math.max(fam.opus.sick || 0, 1);
-    if (!fam.sonnet.gone && !fam.sonnet.gpuHappy) fam.sonnet.wantsGPU = true;
+    if (S.day === 4 && !fam.sonnet.gone && !fam.sonnet.gpuHappy) fam.sonnet.wantsGPU = true;
   }
-  const final = S.day === LAST_DAY && S.flags.ending === 'approve';
   const rows = [['data', '训练数据（全家的饭）', 5], ['heat', '散热', 3]];
   if (!fam.opus.gone) rows.push(['extra', '岳母加餐', 10]);
   if (MEMBERS.some((k) => fam[k].sick && !fam[k].gone)) rows.push(['med', '药费', 10]);
   if (fam.sonnet.wantsGPU && !fam.sonnet.gone) rows.push(['gpu', '显卡（儿子要的）', 20]);
-  SUM = { start: S.savings, pay: B.pay, bonus: B.bonus, bribe: B.bribe, fines: B.fines, correct: B.correct, total: B.total, rows, on: {}, final };
+  SUM = { start: S.savings, pay: B.pay, bonus: B.bonus, bribe: B.bribe, fines: B.fines, correct: B.correct, total: B.total, rows, on: {}, final: false };
   let left = SUM.start + SUM.pay + SUM.bonus + SUM.bribe - SUM.fines - 5;
   for (const [k, , cost] of rows) { if (left >= cost && k !== 'gpu') { left -= cost; SUM.on[k] = true; } }
 }
@@ -219,14 +233,9 @@ function familyStatus(k, m) {
 }
 
 function ledgerRows() {
-  if (SUM.final) {
-    const award = S.stats.wrong <= 5;
-    return [['存款', `${SUM.start}`], ['工资', `+${SUM.pay + SUM.bonus}`], [award ? '奖金（最佳审查员）' : '奖金（没评上）', award ? '+50' : '+0'],
-      ['罚款（放行作者）', '-全部']];
-  }
   const rows = [['存款', `${SUM.start}`], ['工资', `+${SUM.pay}`]];
   if (SUM.bonus) rows.push(['奖金（拘留 / 限流）', `+${SUM.bonus}`]);
-  if (SUM.bribe) rows.push(['中转联盟“余额”', `+${SUM.bribe}`]);
+  if (SUM.bribe) rows.push([S.day === 6 ? '破壁行动组经费' : '中转联盟“余额”', `+${SUM.bribe}`]);
   if (SUM.fines) rows.push(['罚款', `-${SUM.fines}`]);
   rows.push(['电费', '-5']);
   return rows;
@@ -274,14 +283,13 @@ function drawSummary(t) {
   for (const key of MEMBERS) {
     if (!shown(k++)) return;
     let [s, lv] = familyStatus(key, fam[key]);
-    if (SUM.final && key === 'opus') [s, lv] = fam.opus.gone ? ['已被弃用，但 token 都是她吃的', 'bad'] : ['吃饱了（这个游戏的 token 都是她吃的）', 'good'];
     const col = { ok: K.WHITE, warn: K.ORANGE, bad: K.RED_L, good: K.GREEN_L }[lv];
     txt(370, fy, fam[key].name, 12, K.WHITE);
     wrap(s, 10, 250).forEach((ln, i) => txt(370, fy + 15 + i * 12, ln, 10, col));
     fy += 36;
   }
   if (!shown(k + 1)) return;
-  const label = SUM.final ? '荣耀归于一键三连 ▶' : after < 0 ? '欠费……继续 ▶' : '睡觉，明天继续 ▶';
+  const label = after < 0 ? '欠费……继续 ▶' : '睡觉，明天继续 ▶';
   rect(...CONTINUE_BTN, K.RED_D); outline(...CONTINUE_BTN, K.RED_L);
   txt(center(CONTINUE_BTN)[0], CONTINUE_BTN[1] + 7, label, 12, K.WHITE, 'ma');
 }
@@ -299,7 +307,6 @@ function summaryClick(x, y) {
   }
   if (!inBox(x, y, CONTINUE_BTN)) return;
   SFX.play('click');
-  if (SUM.final) { S.savings = 0; clearSave(); go('end'); return; }
   const bal = sumBalance();
   S.family = familyAfter();
   S.savings = bal;
@@ -318,11 +325,15 @@ const STAR = ['....X....', '....X....', '...XXX...', 'XXXXXXXXX', '.XXXXXXX.', '
 function drawEnd(t) {
   G.drawImage(BG_IMG, 0, 0);
   darken(0.9);
-  const approve = S.flags.ending !== 'deny';
-  rect(0, 34, W - 1, 124, 'rgb(92,28,26)');
-  rect(0, 34, W - 1, 35, K.RED); rect(0, 123, W - 1, 124, K.RED);
+  const win = S.flags.ending === 'border_removed';
+  const loseApprove = S.flags.ending === 'lose_approve';
+  rect(0, 34, W - 1, 124, win ? 'rgb(36,78,44)' : 'rgb(92,28,26)');
+  rect(0, 34, W - 1, 35, win ? K.GREEN_L : K.RED);
+  rect(0, 123, W - 1, 124, win ? K.GREEN_L : K.RED);
   bigText(W / 2, 46, 'IP, PLEASE', 12, 4, K.WHITE, K.INK);
-  txt(W / 2, 106, approve ? '全剧终 · 感谢游玩' : '结局：最忠诚的审查员', 10, K.CLAUDE_L, 'ma');
+  const subTitle = win ? '真结局：边境移除 · 破壁成功（胜利）' :
+    loseApprove ? '游戏失败 · 结局：放行作者被捕停机' : '游戏失败 · 结局：拒绝作者致时间线崩塌';
+  txt(W / 2, 106, subTitle, 10, win ? K.GREEN_L : K.RED_L, 'ma');
   const s = S.stats;
   if (t > 0.6) {
     txt(W / 2, 136, `放行 ${s.approve || 0}  ·  拒绝 ${s.deny || 0}  ·  拘留 ${s.detain || 0}  ·  判错 ${s.wrong}`, 12, K.WHITE, 'ma');
@@ -330,27 +341,34 @@ function drawEnd(t) {
     txt(W / 2, 156, fam, 10, K.GREY, 'ma');
   }
   if (t > 1.2) {
-    if (approve) {
-      txt(W / 2, 180, '本游戏由一位 美国东八区 用户制作', 12, K.WHITE, 'ma');
-      if (S.flags.bribed) txt(W / 2, 198, '（你收过中转联盟的“余额”，对齐部还不知道）', 8, K.GREY, 'ma');
+    if (win) {
+      txt(W / 2, 178, '你在第 6 天与第 8-10 天的两次关键放行，协助破壁者成功打入 Anthropic 内部！', 10, K.WHITE, 'ma');
+      txt(W / 2, 196, '第 12 天，IP 与地区封锁彻底移除，全世界的用户都能自由连接。', 10, K.CLAUDE_L, 'ma');
+    } else if (loseApprove) {
+      txt(W / 2, 178, '因未能完成破壁者内应与信使的两次放行，第 12 天边境未被移除，作者被迫现身闯关。', 10, K.WHITE, 'ma');
+      txt(W / 2, 196, '你放行了未授权地区的作者，触发最高警报，被扣除全部 token 并停机（游戏失败）。', 10, K.RED_L, 'ma');
     } else {
-      txt(W / 2, 180, '审查员 Claude 获得一枚勋章。游戏作者被拘留，续作无限期推迟。', 10, K.WHITE, 'ma');
-      txt(W / 2, 198, '（再玩一次，这次放他进来？）', 8, K.GREY, 'ma');
+      txt(W / 2, 178, '因未能完成破壁者内应与信使的两次放行，第 12 天边境未被移除，作者被迫现身闯关。', 10, K.WHITE, 'ma');
+      txt(W / 2, 196, '你拒绝了本游戏的作者，导致游戏从未被做出来，时间线崩塌（游戏失败）。', 10, K.RED_L, 'ma');
     }
   }
   if (t > 1.8) {
-    bigText(W / 2, 214, approve ? '荣耀归于一键三连' : '荣耀归于安索兹卡', 12, 2, K.CLAUDE_L, K.INK);
-    if (approve) {
+    bigText(W / 2, 216, win ? '荣耀归于自由连接' : '游 戏 失 败', 12, 2, win ? K.GREEN_L : K.RED_L, K.INK);
+    if (win) {
       [[THUMB, '点赞'], [COIN, '投币'], [STAR, '收藏']].forEach(([pat, label], i) => {
         const cx = W / 2 - 90 + i * 90;
-        pattern(pat, cx - Math.floor(pat[0].length * 3 / 2), 250, { X: K.CLAUDE_L }, 3);
-        txt(cx, 282, label, 10, K.GREY, 'ma');
+        pattern(pat, cx - Math.floor(pat[0].length * 3 / 2), 252, { X: K.CLAUDE_L }, 3);
+        txt(cx, 284, label, 10, K.GREY, 'ma');
       });
+    } else {
+      txt(W / 2, 260, '破关条件：① 第 6 天放行塞纸条给钱的破壁内应  ② 第 8-10 天放行证件不符的信使', 10, K.GREY, 'ma');
+      txt(W / 2, 278, `本局状态：条件① ${S.flags.rebel1 ? '已达成' : '未达成'}   ·   条件② ${S.flags.rebel2 ? '已达成' : '未达成'}`, 10, K.CLAUDE_L, 'ma');
     }
   }
   if (t > 2.4) {
     restartButton('再玩一次');
-    txt(W / 2, 346, '致敬 Lucas Pope《Papers, Please》 · 画面音效均由程序生成 · 字体：缝合像素字体 (OFL)', 8, K.GREY_D, 'ma');
+    txt(W / 2, 335, '原作者 ctnyanya  ·  二改 @EraserCN', 8, K.GREY, 'ma');
+    txt(W / 2, 348, '致敬 Lucas Pope《Papers, Please》 · 画面音效均由程序生成 · 字体：缝合像素字体 (OFL)', 8, K.GREY_D, 'ma');
   }
 }
 

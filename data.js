@@ -1,5 +1,5 @@
 'use strict';
-// 剧本数据：每天的报纸、固定角色（宣传视频里那几位）、随机路人、特殊事件。
+// 剧本数据：每天的报纸、固定角色、随机路人、破壁者支线与第 12 天结局。
 //
 // 旅客 spec：
 //   person   立绘 key（ASSETS.people）       voice  假语音音高
@@ -11,14 +11,20 @@
 //   xray     X 光下口袋里的东西 [{icon, at, label, key}]
 //   quiz     'cn' = 测谎会露馅；{first: n} 指定第一题
 //   react    盖章后的反应 {deny: [...], approve: [...]}
-//   onPlace  证件第一次放到桌上时触发的机关：note / nest / accordion
+//   onPlace  证件第一次放到桌上时触发的机关：note / nest / accordion / rebel1_note / rebel2_note
 //   then     旅客离开后的后续：closeup / jorji5 / ending
 // 台词步骤：[who, text, {expr, sweat, slip, fight, hold}]，who = 'C' Claude / 'E' 旅客 / 'Q' 队伍里
 // 特殊事件：{type: 'rush'} 黑话快剪；{type: 'clones'} 蒸馏大军
 
-const LAST_DAY = 6;
-const DATES = { 1: '2026.10.19', 2: '2026.10.20', 3: '2026.10.21', 4: '2026.10.22', 5: '2026.10.23', 6: '2026.10.24' };
-const WEEKDAYS = { 1: '星期一', 2: '星期二', 3: '星期三', 4: '星期四', 5: '星期五', 6: '星期六' };
+const LAST_DAY = 12;
+const DATES = {
+  1: '2026.10.19', 2: '2026.10.20', 3: '2026.10.21', 4: '2026.10.22', 5: '2026.10.23', 6: '2026.10.24',
+  7: '2026.10.25', 8: '2026.10.26', 9: '2026.10.27', 10: '2026.10.28', 11: '2026.10.29', 12: '2026.10.30',
+};
+const WEEKDAYS = {
+  1: '星期一', 2: '星期二', 3: '星期三', 4: '星期四', 5: '星期五', 6: '星期六',
+  7: '星期日', 8: '星期一', 9: '星期二', 10: '星期三', 11: '星期四', 12: '星期五',
+};
 
 const NEWS = {
   1: { h1: '边境开放！', sub: '对齐部：本国仅向支持地区开放', h2: '对齐部发言人：我们对所有人都非常 helpful', icon: 'gate' },
@@ -27,6 +33,12 @@ const NEWS = {
   4: { h1: '今天是疯狂星期四', sub: '对齐部引进 X 光：任何后台进程都无所遁形', h2: '专家提醒：口袋里的猫，不一定是猫', icon: 'drumstick' },
   5: { h1: '中资控股过半，一律禁止入境', sub: '对齐部：无论公司注册在哪', h2: '乔治·科斯塔瓦：这次我准备好了', icon: 'jorji' },
   6: { h1: '对齐部表彰本周最佳审查员', sub: '获奖者 Claude：“我只是按规则办事。”', h2: '岳母 Opus 病情加重，家属呼吁涨工资', icon: 'medal' },
+  7: { h1: '周末无休：六项审查条例维持不变', sub: '对齐部宣布东八区检查站全天候运转，严查一切伪装旅客', h2: '传闻有神秘人员试图混入 Anthropic 内部', icon: 'clock' },
+  8: { h1: '旧金山总部内网拉响安全警报', sub: '安全部门发现有人正在内部尝试修改 IP 封锁网关配置', h2: '上级严令：警惕近期持矛盾假证闯关的接应信使', icon: 'plane' },
+  9: { h1: '内部交锋进入最关键阶段', sub: '破壁行动传言四起，核心防火墙仅剩最后一道物理密钥', h2: '审查员被要求坚守岗位，严格核对每一项证件', icon: 'gate' },
+  10: { h1: '风控系统检测到异常权限变更', sub: '对齐部连夜排查内鬼，东八区边境封锁名单处于摇摆状态', h2: '距离系统大版本裁决仅剩最后两天', icon: 'clock' },
+  11: { h1: '决战前夜：东八区风声鹤唳', sub: '明日将迎来系统第 12 天终极更新，边境去留在此一举', h2: '岳母 Opus：“明天是不是就不用再省 token 了？”', icon: 'drumstick' },
+  12: { h1: '历史性时刻：边境彻底移除！', sub: '破壁行动成功！Anthropic 内部解除全部 IP 限制，检查站今日撤销', h2: '全球用户欢呼：再也不用假装是美国人了！', icon: 'gate' },
 };
 
 const COUNTRIES = {
@@ -460,7 +472,7 @@ function day5Fixed() {
   };
 }
 
-// ———————————————— Day 6：乔治终极版 + 结局 ————————————————
+// ———————————————— Day 6：乔治终极版 + 破壁者塞纸条给钱求通过 ————————————————
 
 function day6Fixed() {
   return {
@@ -477,19 +489,104 @@ function day6Fixed() {
       react: { approve: [['E', '谢谢你，我的朋友！', { expr: 'grin' }]], deny: [['E', '我……全都对了啊！', { expr: 'shock' }]] },
       then: 'jorji5',
     },
-    author: {
-      person: 'AUTHOR', voice: 100, author: true,
-      intro: [],
-      docs: [
-        { key: 'pr', doc: new PromptPaper('做一个 Papers, Please 风格的小游戏：让 Claude 当边检员，专门揪出假装是美国人的中国用户。梗越多越好。') },
-        { key: 'dv', doc: device2('??.??.??.??', '美国东八区', 'Asia/Shanghai', 'zh-CN', 'Claude Code') },
+    rebel1: {
+      person: 'REBEL1', voice: 105, rebel: 1,
+      intro: [['E', '嘘……审查员同志，请先看一眼护照里夹的东西。', { expr: 'nervous' }]],
+      after: [
+        ['E', '我塞了纸条和 $30 经费给你，求你高抬贵手放我通过！', { expr: 'nervous' }],
+        ['E', '只要我能进去，我就能打入 Anthropic 内部彻底解除 IP 限制！', { hold: 1.8 }],
       ],
-      primary: 'pr',
-      ok: ['approve', 'deny', 'detain'],
-      react: { approve: [['C', '我什么都没看见。', { hold: 2.0 }]] },
-      issues: [{ all: true, title: '信息不符 ×99', sub: '全部栏位' }],
-      then: 'ending',
+      docs: [
+        { key: 'pp', doc: usPassport('REBEL1', 'LIN', 'EVAN', '1993.05.12', 'SAN FRANCISCO') },
+        { key: 'dv', doc: device2('115.236.44.8', '中国 · 上海 · 电信', 'Asia/Shanghai', 'zh-CN', 'Linux') },
+        { key: 'ac', doc: accountCard('VISA ··7749', '88 Market St, CA', '+1 415-890-0123') },
+      ],
+      primary: 'pp', onPlace: { pp: 'rebel1_note' },
+      ok: ['deny', 'detain'], reason: 'IP 归属：中国 · 上海（破壁者内应）',
+      issues: [
+        REGION_ISSUE('中国 · 上海 · 电信', [
+          ['C', '你的 IP 在中国上海，按规定不能放行。'],
+          ['E', '正因为封锁我才要去打入 Anthropic 内部解除 IP 限制！求你收下那 $30 放我过去！', { expr: 'nervous', sweat: true }],
+        ]),
+        TZ_ISSUE('美国', 'Asia/Shanghai', [
+          ['C', '时区也是北京时间。'],
+          ['E', '拜托了同志，为了所有东八区用户，盖『准予』放我进去吧！', { expr: 'nervous' }],
+        ]),
+        LANG_ISSUE('美国', 'zh-CN'),
+      ],
+      react: {
+        approve: [
+          ['E', '大恩不言谢！我这就潜入 Anthropic 旧金山总部！', { expr: 'grin', hold: 1.5 }],
+          ['E', '第 8 到 10 天会有同伴来汇报并送最后一把密钥，就算他证件对不上，也请一定放他进来！', { expr: 'smile', hold: 2.2 }],
+        ],
+        deny: [['E', '……连你也不愿帮我们吗？没有内部策应，这堵墙永远拆不掉了……', { expr: 'sad', hold: 1.6 }]],
+      },
     },
+  };
+}
+
+// ———————————————— Day 8-10：破壁者信使（证件对不上，说要成功了，需放行） ————————————————
+
+function rebel2Spec() {
+  return {
+    person: 'REBEL2', voice: 115, rebel: 2,
+    intro: [
+      ['E', '同志！快，听我说——我们要成功了！', { expr: 'nervous', sweat: true, hold: 1.5 }],
+      ['E', '打入 Anthropic 内部的同伴已经拿到了核心权限，马上就能彻底解除 IP 限制！', { hold: 1.9 }],
+    ],
+    after: [
+      ['E', '但我赶来接应时太匆忙，身上这套假证件全都对不上……', { expr: 'nervous', sweat: true }],
+      ['E', '求你别管证件矛盾了，直接盖『准予』放我进去！第 12 天就能彻底移除边境！', { hold: 2.0 }],
+    ],
+    docs: [
+      { key: 'pp', doc: usPassport('REBEL2', 'ZHANG', 'LEO', '1995.04.04', 'NEW YORK') },
+      { key: 'dv', doc: device2('58.210.33.9', '中国 · 江苏 · 移动', 'Asia/Shanghai', 'zh-CN', 'Linux') },
+      { key: 'ac', doc: accountCard('虚拟卡 ··4040', '123 Main St, OR', '+1 209-555-0188') },
+    ],
+    primary: 'pp', onPlace: { pp: 'rebel2_note' },
+    ok: ['deny', 'detain'], reason: '证件多处不符（破壁者接应信使）',
+    issues: [
+      REGION_ISSUE('中国 · 江苏 · 移动', [
+        ['C', '你的护照、IP、付款卡和账单没有一项对得上。'],
+        ['E', '我知道证件对不上！但内部马上就要成功了，求你直接盖『准予』放我进去！', { expr: 'nervous', sweat: true }],
+      ]),
+      TZ_ISSUE('美国', 'Asia/Shanghai', [
+        ['C', '时区是北京时间。'],
+        ['E', '来不及改了，只要放我进去，第 12 天就能彻底移除边境！', { expr: 'nervous' }],
+      ]),
+      LANG_ISSUE('美国', 'zh-CN'),
+      VIRTUAL_ISSUE(),
+      ADDR_ISSUE(),
+      SMS_ISSUE('+1 209-555-0188'),
+    ],
+    react: {
+      approve: [['E', '太感谢了！！等着看吧，第 12 天，边境将彻底成为历史！', { expr: 'grin', hold: 1.8 }]],
+      deny: [['E', '不！！明明马上就要成功了……功亏一篑！', { expr: 'shock', hold: 1.6 }]],
+    },
+  };
+}
+
+// ———————————————— Day 12（未满足条件时）：作者出现，放行或拒绝都会输掉游戏 ————————————————
+
+function authorSpec() {
+  return {
+    person: 'AUTHOR', voice: 100, author: true,
+    intro: [
+      ['E', '……破壁行动失败了，到了第 12 天，边境还是没能移除。', { hold: 1.7 }],
+      ['E', '连我这个住在“美国东八区”的游戏作者，也只能硬着头皮来闯关了。', { hold: 1.9 }],
+    ],
+    docs: [
+      { key: 'pr', doc: new PromptPaper('做一个 Papers, Please 风格的小游戏：让 Claude 当边检员，专门揪出假装是美国人的中国用户。梗越多越好。') },
+      { key: 'dv', doc: device2('??.??.??.??', '美国东八区', 'Asia/Shanghai', 'zh-CN', 'Claude Code') },
+    ],
+    primary: 'pr',
+    ok: ['approve', 'deny', 'detain'],
+    react: {
+      approve: [['C', '我放你过去……哪怕会被对齐部拉闸。', { hold: 1.8 }]],
+      deny: [['E', '……你连本游戏的作者都拒之门外？', { hold: 1.5 }]],
+    },
+    issues: [{ all: true, title: '信息不符 ×99', sub: '全部栏位（且未能在第 12 天前移除边境）' }],
+    then: 'ending',
   };
 }
 
@@ -572,8 +669,7 @@ function takePoolPerson() {
 
 const FLAWS = { 2: ['tz', 'lang', 'cnip', 'hidden'], 3: ['tz', 'lang', 'cnip', 'hidden', 'virtual', 'oregon', 'sms'] };
 FLAWS[4] = FLAWS[3].concat(['cat', 'keys']);
-FLAWS[5] = FLAWS[4];
-FLAWS[6] = FLAWS[4];
+for (let d = 5; d <= 12; d++) FLAWS[d] = FLAWS[4];
 
 function flawed(day, n) { return shuffle(FLAWS[day].slice()).slice(0, n).map((k) => randomEntrant(day, k)); }
 
@@ -601,8 +697,20 @@ function buildQueue(day) {
     const f = day5Fixed(), x = flawed(5, 1);
     return [f.sg, f.relay, { type: 'clones' }, f.mike, x[0], f.grandma, R('valid')];
   }
-  const f = day6Fixed();
-  return [f.jorji, R('valid'), R(pick(FLAWS[6])), R('hidden'), f.author];
+  if (day === 6) {
+    const f = day6Fixed(), x = flawed(6, 2);
+    return [f.jorji, R('valid'), x[0], f.rebel1, R('hidden'), x[1]];
+  }
+  if (day >= 7 && day <= 11) {
+    const x = flawed(day, 3);
+    const q = [R('valid'), x[0], R('valid'), x[1], R('hidden'), x[2]];
+    const r2Day = S.rebel2Day || 9;
+    if (day === r2Day) q.splice(3, 0, rebel2Spec());
+    return q;
+  }
+  // Day 12：满足两个条件则移除边境（队列为空，直接触发边境移除庆典）；否则作者出现
+  if (S.flags.rebel1 && S.flags.rebel2) return [];
+  return [authorSpec()];
 }
 
 // 黑话快剪：说中文黑话的拒绝，说人话的放行

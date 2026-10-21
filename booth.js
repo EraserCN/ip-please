@@ -30,6 +30,7 @@ const st = () => now - sceneT0;
 // ———————————————————— 一天 ————————————————————
 
 function startDay() {
+  const borderRemoved = S.day === LAST_DAY && !!(S.flags.rebel1 && S.flags.rebel2);
   B = {
     queue: buildQueue(S.day), idx: 0, ent: null, docs: [], lines: [], timers: [],
     tray: { open: false, t: -9 }, presses: [], shake: -9,
@@ -38,7 +39,11 @@ function startDay() {
     ruleInst: null, rulePos: [228, 136], ruleOpened: false, speakerT: -9, fightT: -9, harmlessT: -9,
     pay: 0, bonus: 0, bribe: 0, fines: 0, cites: 0, correct: 0, total: 0, flash: null, clock0: now,
     ending: false, event: null, cut: null, closeup: null, lastFinish: now, tensionSrc: null, allTokens: false,
+    borderRemoved,
   };
+  if (borderRemoved) {
+    later(0.8, startBorderRemoved);
+  }
 }
 
 function later(dt, fn) { B.timers.push({ t: now + dt, fn }); }
@@ -96,7 +101,7 @@ const isEvent = (it) => it && it.type;
 
 function callNext() {
   SFX.play('click');
-  if (B.ent || B.event || B.cut || B.closeup || B.ending || B.idx >= B.queue.length) return;
+  if (B.ent || B.event || B.cut || B.closeup || B.ending || B.borderRemoved || B.idx >= B.queue.length) return;
   if (isEvent(nextItem())) { startEvent(B.queue[B.idx++]); return; }
   B.speakerT = now;
   SFX.play('intercom', 1, 0.03);
@@ -150,7 +155,7 @@ function leave(e, dec) {
   e.phase = 'leave'; e.tLeave = now; e.dir = dec === 'approve' ? 'right' : 'left';
   stopTension();
   for (let i = 0; i < 3; i++) later(i * 0.22, () => SFX.step(3 + i));
-  later(0.15, () => { B.docs = B.docs.filter((d) => d.owner !== 'ent'); });
+  later(0.15, () => { B.docs = B.docs.filter((d) => d.owner !== 'ent' && d.key !== 'rebel_note' && d.key !== 'cash'); });
   later(0.65, () => finish(e, dec));
 }
 
@@ -162,7 +167,7 @@ function detain() {
   stopTension();
   SFX.play('detain');
   SFX.play('scuffle', 1, 0.2);
-  later(1.2, () => { B.docs = B.docs.filter((d) => d.owner !== 'ent'); });
+  later(1.2, () => { B.docs = B.docs.filter((d) => d.owner !== 'ent' && d.key !== 'rebel_note' && d.key !== 'cash'); });
   later(1.7, () => finish(e, 'detain'));
 }
 
@@ -188,6 +193,28 @@ function judge(e, dec) {
   if (spec.bribe && dec === 'approve' && S.flags.sawNote) {
     B.bribe += 20; S.flags.bribed = true; B.harmlessT = now;
     later(0.8, () => flash('地下中转联盟：$20 余额已到账。合作愉快。'));
+  }
+  if (spec.rebel === 1) {
+    if (dec === 'approve') {
+      S.flags.rebel1 = true;
+      B.bribe += 30;
+      S.flags.bribed = true;
+      B.harmlessT = now;
+      later(0.8, () => flash('破壁行动组：$30 经费已到账！内应已潜入 Anthropic 内部。'));
+    } else {
+      S.flags.rebel1 = false;
+      later(0.8, () => flash('你拒绝了破壁者内应，退回了 $30 经费。'));
+    }
+  }
+  if (spec.rebel === 2) {
+    if (dec === 'approve') {
+      S.flags.rebel2 = true;
+      B.harmlessT = now;
+      later(0.8, () => flash(S.flags.rebel1 ? '最后一枚密钥已送入内部！第 12 天将彻底移除边境！' : '你放行了信使，但第 6 天未放行内应，行动恐难成功……'));
+    } else {
+      S.flags.rebel2 = false;
+      later(0.8, () => flash('你拦下了破壁者信使，内部解除 IP 限制的行动失败了。'));
+    }
   }
   if (spec.ok.includes(dec)) {
     B.correct++; S.stats.correct++;
@@ -251,6 +278,37 @@ function onFirstPlace(d) {
       S.flags.sawNote = true;
       flash('护照里掉出一张纸条（不想要就拖回窗口那边扔掉）');
     });
+  } else if (trig === 'rebel1_note') {
+    const noteDoc = new Note([
+      '审查员同志：',
+      '请收下这 $30 经费，放我通过！',
+      '我将打入 Anthropic 内部，',
+      '从根源解除 IP 封锁限制！',
+      '—— 破壁行动组',
+    ]);
+    const cashDoc = new CashSlip(30);
+    const [nx, ny] = clampDesk(d.x + 24, d.y + 64, noteDoc);
+    const [cx, cy] = clampDesk(d.x + 150, d.y + 74, cashDoc);
+    later(0.3, () => {
+      B.docs.push({ doc: noteDoc, key: 'rebel_note', owner: 'desk', big: true, x: nx, y: ny, marks: [] });
+      B.docs.push({ doc: cashDoc, key: 'cash', owner: 'desk', big: true, x: cx, y: cy, marks: [] });
+      SFX.paper(11);
+      S.flags.sawRebel1Note = true;
+      flash('护照里夹着求通过的纸条和 $30 经费！（在护照上盖『准予』并还给他即可放行）');
+    });
+  } else if (trig === 'rebel2_note') {
+    const noteDoc = new Note([
+      '十万火急：',
+      '内部破壁马上就要成功了！',
+      '我的证件是临时凑的（全错），',
+      '请务必盖『准予』放我进去！',
+    ]);
+    const [nx, ny] = clampDesk(d.x + 28, d.y + 68, noteDoc);
+    later(0.3, () => {
+      B.docs.push({ doc: noteDoc, key: 'rebel_note', owner: 'desk', big: true, x: nx, y: ny, marks: [] });
+      SFX.paper(12);
+      flash('破壁者信使：虽然证件全都对不上，但必须盖『准予』放他进去才能解除边境！');
+    });
   } else if (trig === 'nest') {
     const k = d.nest === undefined ? 0 : d.nest + 1;
     if (k >= NEST.length) return;
@@ -308,7 +366,7 @@ function stamp(kind) {
     if (e && target.owner === 'ent' && target.key === e.spec.primary && !e.decided) {
       e.decided = kind;
       stopTension();
-      if (e.spec.tension && kind === 'approve') SFX.play('fanfare', 1, 0.4);
+      if ((e.spec.tension || e.spec.rebel) && kind === 'approve') SFX.play('fanfare', 1, 0.4);
       if (e.spec.react && e.spec.react[kind]) runSteps(e.spec.react[kind], 0.4);
     }
   } else {
@@ -626,6 +684,25 @@ function along(path, dist) {
 }
 
 function drawExterior() {
+  if (B.borderRemoved) {
+    // 拆除铁丝网与红白栏杆，畅通道路
+    rect(356, 43, 390, 99, K.GROUND);
+    rect(12, 52, 304, 122, K.GROUND);
+    rect(0, 100, W - 1, 123, 'rgb(70,66,60)');
+    for (let x = 10; x < W; x += 14) rect(x, 111, x + 6, 111, 'rgb(140,128,96)');
+    rect(424, 50, 516, 64, K.GREEN_D);
+    outline(424, 50, 516, 64, K.GREEN_L);
+    txt(470, 52, '边境已移除', 10, K.WHITE, 'ma');
+    rect(386, 13, 560, 28, K.GREEN_D);
+    rect(386, 13, 560, 13, K.GREEN_L);
+    txt(473, 16, 'BORDER REMOVED · 自由直连', 10, K.WHITE, 'ma');
+    const freeCoats = [[84, 128, 70], [204, 112, 80], [70, 100, 130], [160, 120, 140], [200, 180, 120], [130, 62, 56]];
+    for (let i = 0; i < 8; i++) {
+      const fx = Math.floor((now * 45 + i * 78) % (W + 40)) - 20;
+      const fy = 106 + (i % 3) * 6;
+      tinyPerson(fx, fy, rgb(freeCoats[i % freeCoats.length]), K.OUTLINE, Math.floor(now * 8 + i) % 2);
+    }
+  }
   const e = B.ent;
   if (e && !e.instant && now >= e.tEnter && !(e.phase === 'detained' && now >= e.tDetain + 0.9)) {
     const meta = ASSETS.people[e.spec.person];
@@ -676,7 +753,7 @@ function button(box, glyph, label, active) {
 }
 
 function drawBoothLower() {
-  const idle = !B.ent && !B.event && B.idx < B.queue.length && !B.ending && !isEvent(nextItem());
+  const idle = !B.ent && !B.event && B.idx < B.queue.length && !B.ending && !B.borderRemoved && !isEvent(nextItem());
   const on = now < B.speakerT + 0.5 || (idle && Math.floor(now * 2) % 2 === 0);
   const [x0, y0] = SPEAKER;
   rect(x0, y0, x0 + 18, y0 + 16, on ? K.CLAUDE : K.METAL_D);
@@ -758,7 +835,8 @@ function drawTray() {
 }
 
 function hintText() {
-  if (B.flash && now < B.flash.t + 3.2) return B.flash.text;
+  if (B.flash && now < B.flash.t + 3.6) return B.flash.text;
+  if (B.borderRemoved) return '破壁成功：边境已移除，所有旅客均可自由通行！';
   const e = B.ent, here = e && e.phase === 'here' && e.handed && !B.event, T = S.tut;
   if (S.day === 1) {
     if (!T.called) return '点左下角闪烁的喇叭，叫下一位';
@@ -781,6 +859,8 @@ function hintText() {
   }
   if (S.day === 3 && !T.account && B.idx <= 2) return '新：账户卡。可疑的付款/账单/手机号，和宪法 §4 一起点';
   if (S.day === 4 && !T.xray) return '新：右下『X光』扫描口袋；检查模式下可以直接点可疑物品';
+  if (e.spec.rebel === 1 && !e.decided) return '破壁者内应：在护照上盖『准予』并交还，可收下 $30 并助他潜入 Anthropic 内部';
+  if (e.spec.rebel === 2 && !e.decided) return '破壁者信使：虽然证件对不上，但必须盖『准予』放他进去才能在第 12 天移除边境';
   return '';
 }
 

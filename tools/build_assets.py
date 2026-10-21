@@ -103,6 +103,7 @@ SCRIPTED = {
     "GRANDPA": cast.GRANDPA, "HK_GUY": cast.HK_GUY, "JORJI": cast.JORJI, "JOHN": cast.JOHN,
     "BROWN": cast.BROWN, "EMILY": cast.EMILY, "GUARD": cast.GUARD, "GUARD2": cast.GUARD2,
     "TOM": cast.TOM, "ALEX": cast.ALEX, "CAT_GIRL": cast.CAT_GIRL, "V50": cast.V50, "HOOD": cast.HOOD,
+    "REBEL1": cast.REBEL1, "REBEL2": cast.REBEL2,
     "SG_MAN": cast.SG_MAN, "RELAY": cast.RELAY, "MIKE": cast.MIKE, "GRANDMA": cast.GRANDMA,
     "JORJI_SUIT": cast.JORJI_SUIT, "AUTHOR": cast.AUTHOR,
     **{f"SLANG{i}": p for i, p in enumerate(cast.SLANG)},

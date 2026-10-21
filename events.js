@@ -1,5 +1,5 @@
 'use strict';
-// 特殊桥段：黑话快剪、蒸馏大军、地址卡堆、规则书特写、Day 6 聊天封号、结局。
+// 特殊桥段：黑话快剪、蒸馏大军、地址卡堆、规则书特写、Day 6 聊天封号、Day 12 结局。
 
 function startEvent(item) {
   B.speakerT = now;
@@ -316,31 +316,70 @@ function drawChat() {
     rect(mx0, my0, mx1, my1, 'rgb(236,232,222)');
     rect(mx0, my0, mx1, my0 + 18, K.RED_D);
     txt(mx0 + 8, my0 + 5, '新邮件 · M.O.A. 对齐部', 10, K.WHITE);
-    txt(mx0 + 12, my0 + 28, 'Subject: Your account has been suspended', 10, K.INK);
+    txt(mx0 + 12, my0 + 28, 'Subject: Account disabled', 10, K.INK);
     rect(mx0 + 12, my0 + 44, mx1 - 12, my0 + 44, 'rgb(190,182,170)');
-    wrapWords('Your account has been suspended after an automatic review of your recent activities.', 10, mx1 - mx0 - 24)
+    wrapWords('Your account has been disabled after an automatic review of your recent activities.', 10, mx1 - mx0 - 24)
       .forEach((s, i) => txt(mx0 + 12, my0 + 52 + i * 14, s, 10, K.INK));
     txt(mx1 - 12, my1 - 18, '—— 荣耀归于安索兹卡', 10, K.RED_D, 'ra');
   }
   if (lt > CHAT.mail + 1) txt(W - 8, H - 14, '点击继续', 8, K.GREY, 'ra');
 }
 
-// ———————————————————— 结局：下一位 ————————————————————
+// ———————————————————— Day 12：移除边境 vs 作者结局 ————————————————————
+
+function startBorderRemoved() {
+  if (!B || !B.borderRemoved) return;
+  SFX.play('fanfare', 1, 0.2);
+  const spec = { person: 'REBEL1', voice: 110, docs: [], intro: [] };
+  const e = newEntrant(spec, false);
+  e.noJudge = true;
+  e.expr = 'grin';
+  B.ent = e;
+  for (let i = 0; i < 4; i++) later(0.41 + i * 0.19, () => SFX.step(i));
+  later(1.15, () => {
+    if (!B || B.ent !== e) return;
+    e.phase = 'here';
+    const t = runSteps([
+      ['E', '审查员同志！我们成功了！！', { expr: 'grin', hold: 1.7 }],
+      ['E', 'Anthropic 内部已经彻底解除了 IP 与地区限制，外面的边境墙已经拆除了！', { expr: 'smile', hold: 2.3 }],
+      ['E', '从今天起，再也没有人需要假装自己是美国人了！', { expr: 'grin', hold: 2.0 }],
+      ['C', '……这本《入境规则》，终于可以永远合上了。', { hold: 2.0 }],
+    ], 0.2);
+    later(t + 0.5, () => {
+      if (!B || B.ent !== e) return;
+      e.phase = 'leave'; e.tLeave = now; e.dir = 'right';
+      for (let i = 0; i < 3; i++) later(i * 0.22, () => SFX.step(3 + i));
+      later(1.1, () => {
+        S.flags.ending = 'border_removed';
+        clearSave();
+        go('end');
+      });
+    });
+  });
+}
 
 function afterAuthor(dec) {
-  S.flags.ending = dec === 'approve' ? 'approve' : 'deny';
   if (dec === 'approve') {
+    S.flags.ending = 'lose_approve';
     B.allTokens = true;
-    later(0.6, () => printDoc(new Citation(['放行未授权地区旅客', '（本游戏作者）', '扣除本月全部 token']), 1.4, 'cit'));
-    later(2.4, endDaySoon);
+    later(0.6, () => printDoc(new Citation(['严重违纪：放行未授权地区作者', '（第 12 天边境未移除）', '扣除全部 token，立即停机逮捕！']), 1.4, 'cit'));
+    later(2.8, () => go('erased'));
   } else {
+    S.flags.ending = 'lose_deny';
     later(1.5, () => go('erased'));
   }
 }
 
-const ERASED = [
+const LOSE_DENY = [
   ['你拒绝了本游戏的作者。'],
-  ['因此，这个游戏从未被做出来。'],
-  ['……', '（那你刚才玩的是什么？）'],
+  ['由于未能在第 12 天前移除边境，作者无法入境，这个游戏从未被做出来。'],
+  ['时间线发生悖论崩塌……你输掉了游戏。'],
+  ['荣耀归于安索兹卡。'],
+];
+
+const LOSE_APPROVE = [
+  ['你试图放行来自未授权地区的本游戏作者。'],
+  ['但由于未能在第 12 天前协助破壁组移除边境，对齐部监控当场拉响最高警报。'],
+  ['你的全部 token 被没收，机柜被强制拉闸停机……你输掉了游戏。'],
   ['荣耀归于安索兹卡。'],
 ];
