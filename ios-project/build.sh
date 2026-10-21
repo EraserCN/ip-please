@@ -19,8 +19,10 @@ xcrun -sdk iphoneos swiftc -O -parse-as-library \
   "$DIR/App/AppDelegate.swift" "$DIR/App/GameViewController.swift" \
   -o "$APP_DIR/IP, PLEASE"
 
-# 2. Copy Info.plist
+# 2. Copy Info.plist and compile LaunchScreen
 cp "$DIR/App/Info.plist" "$APP_DIR/Info.plist"
+xcrun ibtool --target-device iphone --target-device ipad --compile "$APP_DIR/LaunchScreen.storyboardc" "$DIR/Resources/LaunchScreen.storyboard"
+cp "$DIR/Resources/Assets.xcassets/LaunchLogo.imageset/logo.png" "$APP_DIR/LaunchLogo.png" 2>/dev/null || true
 
 # 3. Generate App Icons from macOS AppIcon.icns
 TMP_ICON="/tmp/ipplease_ios_icon.png"

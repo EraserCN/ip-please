@@ -21,6 +21,7 @@ targets:
     deploymentTarget: "15.0"
     sources:
       - path: App
+      - path: Resources/LaunchScreen.storyboard
       - path: Resources/Assets.xcassets
       - path: Resources/web
         type: folder

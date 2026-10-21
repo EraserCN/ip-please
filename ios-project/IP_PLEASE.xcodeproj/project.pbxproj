@@ -10,11 +10,13 @@
 		1CD6B1C26FACC64A3D11DB93 /* web in Resources */ = {isa = PBXBuildFile; fileRef = 7F12C9C072476BCC3BCE3C28 /* web */; };
 		7A4B7E67B45215922A6E1747 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = DCDD308289317E82F9B453E7 /* AppDelegate.swift */; };
 		83DDEFD20F7ECC507450D26D /* GameViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 033056A8FBDDCA01D45E13D0 /* GameViewController.swift */; };
+		D32B215B7743541380940266 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 0CEC3A1D2D38EFBEE551C4AB /* LaunchScreen.storyboard */; };
 		FC4FA866A28D6F608A4BDECC /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = AD72AFB1A5A5118B5D60C421 /* Assets.xcassets */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
 		033056A8FBDDCA01D45E13D0 /* GameViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameViewController.swift; sourceTree = "<group>"; };
+		0CEC3A1D2D38EFBEE551C4AB /* LaunchScreen.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = LaunchScreen.storyboard; sourceTree = "<group>"; };
 		7F12C9C072476BCC3BCE3C28 /* web */ = {isa = PBXFileReference; lastKnownFileType = folder; name = web; path = Resources/web; sourceTree = SOURCE_ROOT; };
 		AD72AFB1A5A5118B5D60C421 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		CC0955910FCE9235736F504E /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
@@ -27,6 +29,7 @@
 			isa = PBXGroup;
 			children = (
 				AD72AFB1A5A5118B5D60C421 /* Assets.xcassets */,
+				0CEC3A1D2D38EFBEE551C4AB /* LaunchScreen.storyboard */,
 			);
 			path = Resources;
 			sourceTree = "<group>";
@@ -120,6 +123,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				FC4FA866A28D6F608A4BDECC /* Assets.xcassets in Resources */,
+				D32B215B7743541380940266 /* LaunchScreen.storyboard in Resources */,
 				1CD6B1C26FACC64A3D11DB93 /* web in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

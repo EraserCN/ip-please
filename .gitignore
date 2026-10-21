@@ -8,4 +8,5 @@ android-project/.gradle/
 android-project/local.properties
 ios-project/build/
 *.xcuserdata
+xcuserdata/
 *.xcscmblueprint
